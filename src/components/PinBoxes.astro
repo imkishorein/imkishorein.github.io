@@ -1,0 +1,21 @@
+---
+// "8+ YEARS" written into PIN-code boxes ("8+", an empty box as the space, then one letter per box), like the PIN row on an Indian postcard.
+// Each cell is a hand-drawn box (public/box-*.svg used as a mask, three variants so no two match).
+// The small label above stands in for the printed "PIN" on the real thing.
+interface Props { chars: string[]; label: string; summary: string; }
+const { chars, label, summary } = Astro.props;
+---
+<div class="pin" role="img" aria-label={summary}>
+  <p class="label muted" aria-hidden="true">{label}</p>
+  <div class="cells" aria-hidden="true">
+    {chars.map((c, i) => <span class={`cell box-${'abc'[i % 3]}`}>{c}</span>)}
+  </div>
+</div>
+<style>
+  .pin { display: grid; gap: var(--space-2); justify-items: start; }
+  .cells { display: flex; width: 100%; max-width: 18.3rem; container-type: inline-size; }
+  .cell { position: relative; display: grid; place-items: center; flex: 1 1 0; min-width: 0; max-width: 2.6rem; height: 3rem; margin-left: -0.1rem; font-family: var(--font-accent); font-size: min(var(--step-2), calc(100cqw / 7 * 0.6)); letter-spacing: -0.04em; /* scales with the box so "8+" always fits */ line-height: 1; color: var(--color-text); }
+  .cell:first-child { margin-left: 0; }
+  .cell::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--color-line-strong); -webkit-mask: var(--box) center / 100% 100% no-repeat; mask: var(--box) center / 100% 100% no-repeat; }
+  .box-a { --box: url("/box-a.svg"); } .box-b { --box: url("/box-b.svg"); } .box-c { --box: url("/box-c.svg"); }
+</style>

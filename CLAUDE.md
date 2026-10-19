@@ -39,8 +39,9 @@ Reference sites: hvpandya.com (Stuff page, notes) and charmiekapoor.com. Micro i
 - `src/data/site.ts`: name, bio, links, nav (with Japanese sublabels), timeline, community roles, stuff list
 - `src/content/notes/*.md`: notes (fields in `src/content.config.ts`: title, date, category, summary, placeholder, draft)
 - `src/pages`: Home, Notes, Stuff, About are live. Work, Community, Photography are "coming soon" stubs.
-- `src/components`: Envelope (hero, airmail envelope with a live postmark), PortraitArt (illustrated stamp portrait), Postmark, Stamp (CSS mask perforation), DateStamp (small date stamp for notes and About years), Nav (includes the theme switch), Controls (theme and sound switches, rendered in Nav), Footer, PageHead, NoteRow, ComingSoon
+- `src/components`: Envelope (hero, airmail envelope with a live postmark), PinBoxes (hand-drawn PIN-code boxes, used for "8+ years"), PortraitArt (illustrated stamp portrait), Postmark, Stamp (CSS mask perforation), DateStamp (small date stamp for notes and About years), Nav (includes the theme switch), Controls (theme and sound switches, rendered in Nav), Footer, PageHead, NoteRow, ComingSoon
 - `src/scripts/live.ts`: live postmark date and time (Asia/Kolkata) and the hero "Now" weather row from Open-Meteo. Cached in sessionStorage `imk:wx`.
+- `src/scripts/weather-icon.ts`: picks the hand-drawn animated SVG weather icon (`WeatherIcon.astro`) from the Open-Meteo weather code and day or night. Animations are off under reduced motion.
 - `src/scripts/site.ts`: theme switch, sound synth, stamp interactions, hanko easter egg
 - `TOKENS.md`: how to change colours and fonts
 

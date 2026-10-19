@@ -4,6 +4,8 @@
   Weather is one small request to Open-Meteo (free, no key) for the city centre, so it
   hints at "I'm here" without any precise location. If it fails, the Now row stays hidden.
 */
+import { kindFor } from './weather-icon';
+
 const TZ = 'Asia/Kolkata';
 const pmDate = document.querySelector<SVGTextElement | SVGTextPathElement>('[data-pm-date]');
 const pmHH = document.querySelector<SVGTSpanElement>('[data-pm-hh]');
@@ -11,6 +13,7 @@ const pmMM = document.querySelector<SVGTSpanElement>('[data-pm-mm]');
 const pmPeriod = document.querySelector<SVGTextElement>('[data-pm-period]');
 const wxEl = document.querySelector<HTMLElement>('[data-live-wx]');
 const wxRow = document.querySelector<HTMLElement>('[data-live-row]');
+const wxIcon = document.querySelector<SVGElement>('[data-wx-icon]');
 
 const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
 
@@ -30,14 +33,14 @@ document.addEventListener('visibilitychange', () => { // no ticking in backgroun
 
 /* weather: WMO code to plain words */
 const describe = (code: number, day: boolean) =>
-  code === 0 ? (day ? 'Clear' : 'Clear night') : code <= 2 ? 'Partly cloudy' : code === 3 ? 'Overcast' :
+  code === 0 ? (day ? 'Clear' : 'Clear night') : code === 1 ? 'Mostly clear' : code === 2 ? 'Partly cloudy' : code === 3 ? 'Overcast' :
   code <= 48 ? 'Foggy' : code <= 57 ? 'Drizzle' : code <= 67 ? 'Rain' : code <= 77 ? 'Snow' :
   code <= 86 ? 'Showers' : 'Thunderstorms';
 
 const KEY = 'imk:wx', MAX_AGE = 10 * 60 * 1000;
 type Wx = { t: number; temp: number; code: number; day: boolean };
 const read = (): Wx | null => { try { const w = JSON.parse(sessionStorage.getItem(KEY) || 'null'); return w && Date.now() - w.t < MAX_AGE ? w : null; } catch { return null; } };
-const paint = (w: Wx) => { if (wxEl && wxRow) { wxEl.textContent = `${Math.round(w.temp)}°C, ${describe(w.code, w.day)}`; wxRow.hidden = false; } };
+const paint = (w: Wx) => { if (wxEl && wxRow) { wxEl.textContent = `${Math.round(w.temp)}°C, ${describe(w.code, w.day)}`; wxRow.hidden = false; if (wxIcon) wxIcon.dataset.kind = kindFor(w.code, w.day); } };
 
 async function weather() {
   const cached = read(); if (cached) { paint(cached); return; }

@@ -12,6 +12,10 @@ export const site = {
   location: 'Bengaluru, India',
   // From the LinkedIn About section.
   positioning: 'I design for the people who run the systems that run the world.',
+  // Hero envelope: the viewer is the addressee. One ruled line.
+  addressee: 'You, kindly reading',
+  focus: 'I design and build enterprise B2B SaaS and AI tools.',
+  yearsLabel: '8+ years',
   // PLACEHOLDER: replace the short bio when ready.
   bio: 'Senior UX Designer working at the intersection of Enterprise SaaS, AI and Platform Engineering. I lead the Friends of Figma Bangalore community and write short notes here about what I build and learn.',
   // PLACEHOLDER: swap for a real public address.

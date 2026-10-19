@@ -1,11 +1,14 @@
 ---
-// Hero: the front of an airmail envelope. Stamp and postmark top right, recipient address on
-// the right. The postmark is the live part: it shows today's date and the time in Bengaluru,
-// and the "Now" row shows the weather. Both are filled in by src/scripts/live.ts. Without JS
-// the postmark shows placeholders and the "Now" row stays hidden.
+// Hero: the cover of an airmail letter. FROM is me, top left and big, with what I do and the one
+// number that matters, written into PIN-code boxes like on a postcard. TO is you, the person reading right now, written on ruled
+// address lines bottom right. Stamp and postmark sit top right. The postmark is the live part: today's
+// date and the time in Bengaluru. The small "here" note is the weather. Both are filled in by
+// src/scripts/live.ts. Without JS the postmark shows placeholders and the weather note stays hidden.
 import Stamp from './Stamp.astro';
 import PortraitArt from './PortraitArt.astro';
 import Postmark from './Postmark.astro';
+import PinBoxes from './PinBoxes.astro';
+import WeatherIcon from './WeatherIcon.astro';
 import { site } from '../data/site';
 ---
 <svg class="filters" width="0" height="0" aria-hidden="true" focusable="false">
@@ -28,8 +31,13 @@ import { site } from '../data/site';
   <div class="sheet">
     <div class="message">
       <p class="label muted"><span lang="ja">航空便</span> · Par avion</p>
-      <h1 id="hero-title" class="display h-hero">Hello, I&rsquo;m Kishore.</h1>
-      <p class="lead">{site.positioning}</p>
+      <div class="from">
+        <p class="label muted">From</p>
+        <h1 id="hero-title" class="display h-hero">Kishore<br />Vidyasagar.</h1>
+      </div>
+      <p class="lead">{site.focus}</p>
+      <div class="here muted" data-live-row hidden><WeatherIcon /><span><span data-live-wx></span> here</span></div>
+      <div class="pin-wrap"><PinBoxes chars={site.yearsLabel.toUpperCase().split(' ').flatMap((w, i) => (i ? ['', ...w] : [w]))} label="Experience" summary={`${site.yearsLabel} of experience`} /></div>
     </div>
 
     <div class="stamp-zone" data-stamp-press tabindex="0" role="button" aria-label="Press the stamp">
@@ -37,12 +45,10 @@ import { site } from '../data/site';
       <div class="st"><Stamp caption="Hello" value="2026"><PortraitArt /></Stamp></div>
     </div>
 
-    <aside class="to hand-l" aria-label="Address">
-      <ul class="lines">
-        <li class="hand-b"><span class="label muted">To</span><span>You, kindly reading</span></li>
-        <li class="hand-b"><span class="label muted">From</span><span>{site.name}<span class="muted sub">{site.role}, {site.employer}</span></span></li>
-        <li class="hand-b"><span class="label muted">Does</span><span>Enterprise UX for AI and platforms</span></li>
-        <li data-live-row hidden><span class="label muted">Now</span><span class="now"><span class="dot" aria-hidden="true"></span><span data-live-wx></span></span></li>
+    <aside class="to" aria-label={`To: ${site.addressee}`}>
+      <p class="label muted">To</p>
+      <ul class="address">
+        <li class="hand-b">{site.addressee}</li>
       </ul>
     </aside>
 
@@ -64,27 +70,23 @@ import { site } from '../data/site';
   /* inner edge drawn as a slightly wobbly line instead of a perfect border */
   .sheet::after { content: ""; position: absolute; inset: 0; border: 1.5px solid var(--color-line-strong); filter: url(#env-line); pointer-events: none; }
   .message { grid-area: message; display: flex; flex-direction: column; gap: var(--space-4); align-self: start; }
-  .lead { max-width: 30ch; }
-  .to { grid-area: to; align-self: end; padding-left: var(--space-6); }
-  .lines li { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--space-3); align-items: baseline; padding-block: var(--space-3) var(--space-2); }
-  .lines li:last-child::after { display: none; }
-  .lines li[hidden] { display: none; }
-  .sub { display: block; font-size: var(--step--1); }
+  .from { display: grid; gap: var(--space-2); }
+  /* the name is the sender, so it is set a little smaller than the old greeting to fit "Vidyasagar." on one line */
+  .from h1 { font-size: clamp(1.9rem, 0.6rem + 6.4vw, 5.6rem); overflow-wrap: anywhere; }
+  .lead { max-width: 28ch; }
+  .here { display: flex; align-items: center; gap: var(--space-3); font-size: var(--step--1); }
+  .here[hidden] { display: none; }
+  .pin-wrap { margin-top: auto; padding-top: var(--space-4); }
+  .to { grid-area: to; align-self: end; display: grid; gap: var(--space-2); }
+  .address { display: grid; }
+  .address li { font-size: var(--step-1); font-weight: 500; line-height: 1.2; padding-block: var(--space-3) var(--space-2); letter-spacing: -0.01em; }
   .stamp-zone { grid-area: stamp; position: relative; display: grid; justify-items: end; padding-top: 1.75rem; cursor: pointer; border-radius: var(--radius-1); }
   .stamp-zone .st { width: min(62%, 12rem); transform: rotate(2.5deg); }
   .stamp-zone .pm { position: absolute; width: 72%; left: 0; top: 0; z-index: 2; pointer-events: none; }
 
-  .now { display: inline-flex; align-items: center; gap: var(--space-3); }
-  .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-accent-ink); }
-  @media (prefers-reduced-motion: no-preference) {
-    .dot { animation: live-pulse 2.4s var(--ease-out) infinite; }
-    @keyframes live-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--color-selection); } 60% { box-shadow: 0 0 0 0.4rem transparent; } }
-  }
-
   @media (max-width: 52rem) {
-    .sheet { grid-template-columns: 1fr; grid-template-areas: "message" "stamp" "to"; padding: var(--space-5); gap: var(--space-5); }
+    .sheet { grid-template-columns: minmax(0, 1fr); grid-template-areas: "message" "stamp" "to"; padding: var(--space-5); gap: var(--space-5); }
     .stamp-zone { justify-items: start; }
     .stamp-zone .st { width: min(50%, 9rem); }
-    .to { padding-left: 0; } .to::before { display: none; }
   }
 </style>

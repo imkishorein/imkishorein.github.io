@@ -11,7 +11,7 @@
 
 ## Needs Kishore's review
 - [ ] About page prose and "How I work" were drafted from his LinkedIn text
-- [ ] "8+ years" figure on About came from his LinkedIn summary. His profile elsewhere says 7.5+. Pick one.
+- [x] "8+ years" figure: Kishore confirmed 8+ on 2026-10-19 (hero rubber stamp and About).
 - [ ] Japanese nav labels (葉書 postcard, 仕事 work, メモ notes, 仲間 community, 写真 photography, 道具 stuff, 私 about, 印 seal). Standard words, not checked by a native reader.
 - [ ] Sound volume and character were never heard by ear, only tested for errors
 - [ ] Hero: Japanese label 航空便 (airmail) not checked by a native reader. Weather comes from Open-Meteo at city-centre coordinates (12.97, 77.59): confirm you are happy with a third-party request.
