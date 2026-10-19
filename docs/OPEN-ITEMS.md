@@ -21,7 +21,7 @@
 - [ ] OG image for link previews
 
 ## Deployment
-- [ ] Push to GitHub
+- [x] Push to GitHub (https://github.com/imkishorein/imkishore.in-site, `main`)
 - [ ] Cloudflare Pages project: build `npm run build`, output `dist`
 - [ ] Point imkishore.in DNS at Pages and add as custom domain
 - [ ] Set up the Pages Git integration so pushes deploy
