@@ -74,9 +74,25 @@ main { flex: 1; }
 .page-head .kicker { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--color-text-muted); }
 .page-head .kicker::after { content: ""; width: 3rem; border-top: var(--border) solid var(--color-line-strong); }
 
+/* ───────── rules: the one way to draw a separator on the page grid ─────────
+   The grid is a 1px faint solid hairline. Rules are a different mark on purpose:
+   thicker, dashed like postal perforation, and they knock the grid out around
+   themselves. So a rule can never blur into or double up with a grid line, wherever
+   it lands. Use: add .rule-top or .rule-bottom to a block (.rows and .row already do). Add .rule-solid for a
+   strong section rule. Do not use border-top/bottom for separators on the grid.
+   (Inside a surface card there is no grid behind, so a plain border is fine.) */
+.rule-top, .rule-bottom, .rows, .row { position: relative; --rule-fill: repeating-linear-gradient(90deg, var(--color-rule) 0 var(--rule-dash), transparent 0 calc(var(--rule-dash) + var(--rule-gap))); }
+.rule-solid, .rows { --rule-fill: linear-gradient(var(--color-line-strong), var(--color-line-strong)); }
+.rule-top::before, .rows::before, .rule-bottom::after, .row::after {
+  content: ""; position: absolute; left: 0; right: 0; pointer-events: none;
+  height: calc(var(--rule-weight) + 2 * var(--rule-halo));
+  background: var(--rule-fill) center / 100% var(--rule-weight) no-repeat, var(--color-bg);
+}
+.rule-top::before, .rows::before { top: 0; transform: translateY(-50%); }
+.rule-bottom::after, .row::after { bottom: 0; transform: translateY(50%); }
+
 /* ───────── rows (notes, stuff, timeline) ───────── */
-.rows { border-top: var(--border) solid var(--color-line-strong); }
-.row { display: grid; grid-template-columns: 9rem 1fr auto; gap: var(--space-5); align-items: baseline; padding-block: var(--space-5); border-bottom: var(--border) solid var(--color-line); }
+.row { display: grid; grid-template-columns: 9rem 1fr auto; gap: var(--space-5); align-items: baseline; padding-block: var(--space-5); }
 @media (max-width: 40rem) { .row { grid-template-columns: 1fr; gap: var(--space-2); } }
 
 /* ───────── stamp (perforated edge via mask) ───────── */

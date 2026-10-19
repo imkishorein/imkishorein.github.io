@@ -13,7 +13,7 @@ const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matche
 /* ───────── theme ───────── */
 const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
 const themeLabel = document.querySelector<HTMLElement>('[data-theme-label]');
-const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+const isDark = () => root.dataset.theme === 'dark'; // light is the default, no OS sniffing
 const paintTheme = () => {
   if (!themeBtn || !themeLabel) return;
   themeBtn.setAttribute('aria-pressed', String(isDark()));
@@ -26,7 +26,6 @@ themeBtn?.addEventListener('click', () => {
   paintTheme();
   play('tick');
 });
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintTheme);
 paintTheme();
 
 /* ───────── sound (synthesised, no files, off by default) ───────── */

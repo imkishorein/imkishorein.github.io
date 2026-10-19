@@ -13,7 +13,7 @@ const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'n
       {site.links.map((l) => <li><a href={l.href} rel="me noopener" target={l.href.startsWith('http') ? '_blank' : undefined}>{l.label}</a></li>)}
     </ul>
   </div>
-  <div class="foot__bottom">
+  <div class="foot__bottom rule-top">
     <p class="muted mono small">Last updated {updated}. Set in a pixel and a sans. Try shift-clicking anywhere.</p>
     <Controls />
     <span class="hanko" lang="ja" aria-hidden="true" title="印 (in): a seal">印</span>
@@ -27,6 +27,6 @@ const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'n
   .links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
   .links a { text-underline-offset: 0.25em; text-decoration-color: var(--color-line-strong); }
   .links a:hover { text-decoration-color: currentColor; }
-  .foot__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4) var(--space-5); border-top: var(--border) solid var(--color-line); padding-top: var(--space-5); }
+  .foot__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4) var(--space-5); padding-top: var(--space-5); }
   .small { font-size: var(--step--1); max-width: 46ch; }
 </style>

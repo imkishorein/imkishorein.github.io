@@ -33,3 +33,11 @@ Why: Kishore went with the suggestion.
 ### 2026-10-19: Placeholders and naming
 Contact details, portrait, most Stuff items and community extras are placeholders until Kishore supplies real ones. Naming Salesforce and Agentforce publicly is fine.
 Why: Kishore's answers to the v1 scoping questions.
+
+### 2026-10-19: Light mode is the default, switch lives in the nav
+Soft White is the primary colour on first load, with Sage Green and Deep Olive as secondary and accent. A Light/Dark switch sits at the top right of every page. Dark mode stays as an opt-in and the choice is saved in `imk:theme`. The site no longer follows the OS colour preference.
+Why: the OS preference was serving the dark version, where green becomes the primary colour. Kishore wants the cream palette to lead.
+
+### 2026-10-19: Separators on the grid are dashed rules, not borders
+Any separator that sits on the page grid is a `.rule-top` or `.rule-bottom` (`.rows` and `.row` already are). Rules are a thicker, dashed, perforation-style mark that knocks the grid out around itself. Their size, dash and halo are tokens in `tokens.css` (`--rule-*`, `--color-rule`). Inside surface cards a plain border is still fine.
+Why: solid hairline separators and the solid hairline grid read as the same mark and doubled up wherever they landed near each other. Making rules a different mark means they cannot clash, whatever the content height.

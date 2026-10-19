@@ -13,7 +13,7 @@
 */
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light; /* light is the default. Dark is opt-in via the top switch. */
 
   /* ───────── 1. PALETTE (raw) ───────── */
   --palette-paper: #e8e9df; /* Soft White  */
@@ -35,6 +35,7 @@
   --color-on-strong:     light-dark(var(--palette-paper), var(--palette-olive));
   --color-line:          light-dark(color-mix(in oklab, var(--palette-olive) 34%, transparent), color-mix(in oklab, var(--palette-paper) 30%, transparent));
   --color-line-strong:   light-dark(color-mix(in oklab, var(--palette-olive) 80%, transparent), color-mix(in oklab, var(--palette-paper) 80%, transparent));
+  --color-rule:          light-dark(color-mix(in oklab, var(--palette-olive) 72%, transparent), color-mix(in oklab, var(--palette-paper) 68%, transparent)); /* dashed separators on the page grid */
   --color-grid:          light-dark(color-mix(in oklab, var(--palette-olive) 8%, transparent), color-mix(in oklab, var(--palette-paper) 6%, transparent));
   --color-ink-faded:     light-dark(color-mix(in oklab, var(--palette-olive) 66%, transparent), color-mix(in oklab, var(--palette-paper) 66%, transparent)); /* postmarks */
   --color-focus:         light-dark(var(--palette-olive), var(--palette-sage));
@@ -95,6 +96,12 @@
   --perf-radius: 4px;
   --perf-pitch:  16px;
 
+  /* separators that sit on the page grid (see .rule-* in global.css) */
+  --rule-weight: 2px;   /* thickness, always thicker than the grid hairline */
+  --rule-dash:   6px;
+  --rule-gap:    4px;
+  --rule-halo:   5px;   /* grid is knocked out this far either side of a rule */
+
   --shadow-card: 0 1px 0 var(--color-line), 0 26px 36px -28px var(--color-shadow);
   --shadow-stamp: 0 10px 14px -8px var(--color-shadow);
 
@@ -109,6 +116,7 @@
   --sound-volume: 0.1; /* 0 to 1, kept low on purpose */
 }
 
-/* Explicit theme override (set by the theme toggle). */
+/* Theme switch (top of the page) sets data-theme. Light = Soft White is primary,
+   Sage and Olive are secondary and accent. Dark = Deep Olive is primary. */
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"]  { color-scheme: dark; }
