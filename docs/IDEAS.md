@@ -138,3 +138,8 @@ From screenshots of the LinkedIn profile, as raw material for the Home, About an
 - Idea: haptic feedback on link clicks, plus hidden haptics for the Easter egg interactions (stamp press, shift-click hanko, nav Japanese labels revealing).
 - Constraint: web haptics only work on touch phones. Android vibrates via `navigator.vibrate`. iPhone Safari needs a hidden `<input type="checkbox" switch>` trick. MacBook trackpad haptics are native-app only, so desktop gets nothing from a website. Desktop equivalent is the synthesised sound.
 - Leaning: pair each interaction's sound with a vibration pattern, controlled by the same footer toggle as sound (off by default). Not decided. Parked to revisit later.
+
+**Hero redesign (19 Oct 2026)**
+
+- Primary text should say who I am, not where: "Hello, I'm Kishore." Whole hero should look like a real postcard or envelope with stamp, postmark and location.
+- Should feel live: a sense that I am in Bangalore right now (time and weather), not an exact location.

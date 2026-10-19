@@ -31,7 +31,7 @@ Rule: if it is not in `docs/`, it did not happen. Before a brainstorm ends, offe
 5. Do not invent facts about Kishore. Anything not confirmed is marked placeholder. See `docs/OPEN-ITEMS.md`.
 
 ## Design direction
-Stamp and postcard metaphor plus Japanese aesthetics. White and green palette: Soft White `#E8E9DF`, Sage Green `#A9B887`, Deep Olive `#2E3D28` (only these three raw values appear, in `tokens.css`). Hairline grid background, botanical feel, small widely spaced uppercase nav, one large bold heading per page. Light is the default (Soft White primary, Sage and Olive as accents) and ignores the OS preference. Dark mode is opt-in via the Light/Dark switch in the top nav, derived from the palette with `light-dark()` and `color-mix`, and set through `data-theme`.
+Stamp, postcard and airmail envelope metaphor plus Japanese aesthetics. White and green palette: Soft White `#E8E9DF`, Sage Green `#A9B887`, Deep Olive `#2E3D28` (only these three raw values appear, in `tokens.css`). Hand-dabbed dot grid background (uneven, very faint, `public/dots.svg` used as a mask coloured by `--color-grid`), botanical feel, small widely spaced uppercase nav, one large bold heading per page. Light is the default (Soft White primary, Sage and Olive as accents) and ignores the OS preference. Dark mode is opt-in via the Light/Dark switch in the top nav, derived from the palette with `light-dark()` and `color-mix`, and set through `data-theme`.
 
 Reference sites: hvpandya.com (Stuff page, notes) and charmiekapoor.com. Micro interactions are a core part of the brief: nav underline draw, stamp press and re-postmark, tilting date stamps, hidden shift-click hanko seal.
 
@@ -39,7 +39,8 @@ Reference sites: hvpandya.com (Stuff page, notes) and charmiekapoor.com. Micro i
 - `src/data/site.ts`: name, bio, links, nav (with Japanese sublabels), timeline, community roles, stuff list
 - `src/content/notes/*.md`: notes (fields in `src/content.config.ts`: title, date, category, summary, placeholder, draft)
 - `src/pages`: Home, Notes, Stuff, About are live. Work, Community, Photography are "coming soon" stubs.
-- `src/components`: Postmark, Stamp (CSS mask perforation), Nav (includes the theme switch), Controls (theme and sound switches, rendered in Nav), Footer, PageHead, NoteRow, ComingSoon
+- `src/components`: Envelope (hero, airmail envelope with a live postmark), PortraitArt (illustrated stamp portrait), Postmark, Stamp (CSS mask perforation), DateStamp (small date stamp for notes and About years), Nav (includes the theme switch), Controls (theme and sound switches, rendered in Nav), Footer, PageHead, NoteRow, ComingSoon
+- `src/scripts/live.ts`: live postmark date and time (Asia/Kolkata) and the hero "Now" weather row from Open-Meteo. Cached in sessionStorage `imk:wx`.
 - `src/scripts/site.ts`: theme switch, sound synth, stamp interactions, hanko easter egg
 - `TOKENS.md`: how to change colours and fonts
 

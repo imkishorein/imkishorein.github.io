@@ -1,0 +1,90 @@
+---
+// Hero: the front of an airmail envelope. Stamp and postmark top right, recipient address on
+// the right. The postmark is the live part: it shows today's date and the time in Bengaluru,
+// and the "Now" row shows the weather. Both are filled in by src/scripts/live.ts. Without JS
+// the postmark shows placeholders and the "Now" row stays hidden.
+import Stamp from './Stamp.astro';
+import PortraitArt from './PortraitArt.astro';
+import Postmark from './Postmark.astro';
+import { site } from '../data/site';
+---
+<svg class="filters" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- hand-printed border: wobbly edges plus a little missing ink. Fixed seeds, so it looks the same on every load. -->
+    <filter id="env-rough" filterUnits="userSpaceOnUse" x="-12" y="-12" width="3000" height="3000">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="wave" />
+      <feDisplacementMap in="SourceGraphic" in2="wave" scale="5" xChannelSelector="R" yChannelSelector="G" result="bent" />
+      <feTurbulence type="fractalNoise" baseFrequency="0.3" numOctaves="2" seed="3" result="grain" />
+      <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  7 0 0 0 -2.05" result="grainAlpha" />
+      <feComposite in="bent" in2="grainAlpha" operator="in" />
+    </filter>
+    <filter id="env-line" filterUnits="userSpaceOnUse" x="-12" y="-12" width="3000" height="3000">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="12" result="wave" />
+      <feDisplacementMap in="SourceGraphic" in2="wave" scale="4" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+</svg>
+<article class="envelope">
+  <div class="sheet">
+    <div class="message">
+      <p class="label muted"><span lang="ja">航空便</span> · Par avion</p>
+      <h1 id="hero-title" class="display h-hero">Hello, I&rsquo;m Kishore.</h1>
+      <p class="lead">{site.positioning}</p>
+    </div>
+
+    <div class="stamp-zone" data-stamp-press tabindex="0" role="button" aria-label="Press the stamp">
+      <div class="pm"><Postmark id="pm-hero" /></div>
+      <div class="st"><Stamp caption="Hello" value="2026"><PortraitArt /></Stamp></div>
+    </div>
+
+    <aside class="to hand-l" aria-label="Address">
+      <ul class="lines">
+        <li class="hand-b"><span class="label muted">To</span><span>You, kindly reading</span></li>
+        <li class="hand-b"><span class="label muted">From</span><span>{site.name}<span class="muted sub">{site.role}, {site.employer}</span></span></li>
+        <li class="hand-b"><span class="label muted">Does</span><span>Enterprise UX for AI and platforms</span></li>
+        <li data-live-row hidden><span class="label muted">Now</span><span class="now"><span class="dot" aria-hidden="true"></span><span data-live-wx></span></span></li>
+      </ul>
+    </aside>
+
+  </div>
+</article>
+<style>
+  .filters { position: absolute; }
+  .envelope { position: relative; padding: var(--airmail-width); border-radius: var(--radius-1); box-shadow: var(--shadow-card); }
+  /* the stripes live on a layer of their own so the rough filter bends the border and not the content */
+  .envelope::before { content: ""; position: absolute; inset: 0; background: var(--airmail-stripes); filter: url(#env-rough); pointer-events: none; }
+  /* Message on the left spans two rows, so nothing is pushed down by the stamp. */
+  .sheet {
+    display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-areas: "message stamp" "message to";
+    gap: var(--space-4) var(--space-7);
+    padding: var(--space-5) var(--space-6) var(--space-6);
+    position: relative; background: var(--color-surface);
+  }
+  /* inner edge drawn as a slightly wobbly line instead of a perfect border */
+  .sheet::after { content: ""; position: absolute; inset: 0; border: 1.5px solid var(--color-line-strong); filter: url(#env-line); pointer-events: none; }
+  .message { grid-area: message; display: flex; flex-direction: column; gap: var(--space-4); align-self: start; }
+  .lead { max-width: 30ch; }
+  .to { grid-area: to; align-self: end; padding-left: var(--space-6); }
+  .lines li { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--space-3); align-items: baseline; padding-block: var(--space-3) var(--space-2); }
+  .lines li:last-child::after { display: none; }
+  .lines li[hidden] { display: none; }
+  .sub { display: block; font-size: var(--step--1); }
+  .stamp-zone { grid-area: stamp; position: relative; display: grid; justify-items: end; padding-top: 1.75rem; cursor: pointer; border-radius: var(--radius-1); }
+  .stamp-zone .st { width: min(62%, 12rem); transform: rotate(2.5deg); }
+  .stamp-zone .pm { position: absolute; width: 72%; left: 0; top: 0; z-index: 2; pointer-events: none; }
+
+  .now { display: inline-flex; align-items: center; gap: var(--space-3); }
+  .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-accent-ink); }
+  @media (prefers-reduced-motion: no-preference) {
+    .dot { animation: live-pulse 2.4s var(--ease-out) infinite; }
+    @keyframes live-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--color-selection); } 60% { box-shadow: 0 0 0 0.4rem transparent; } }
+  }
+
+  @media (max-width: 52rem) {
+    .sheet { grid-template-columns: 1fr; grid-template-areas: "message" "stamp" "to"; padding: var(--space-5); gap: var(--space-5); }
+    .stamp-zone { justify-items: start; }
+    .stamp-zone .st { width: min(50%, 9rem); }
+    .to { padding-left: 0; } .to::before { display: none; }
+  }
+</style>

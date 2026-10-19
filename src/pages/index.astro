@@ -1,10 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Stamp from '../components/Stamp.astro';
-import Postmark from '../components/Postmark.astro';
+import Envelope from '../components/Envelope.astro';
 import NoteRow from '../components/NoteRow.astro';
-import { site, nav } from '../data/site';
+import { nav } from '../data/site';
 
 const notes = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
@@ -12,36 +11,7 @@ const rooms = nav.filter((n) => n.href !== '/');
 ---
 <Base>
   <section class="wrap hero" aria-labelledby="hero-title">
-    <article class="postcard">
-      <header class="top label muted">
-        <span class="jp" lang="ja">葉書</span><span>Postcard</span>
-        <span class="top__rule" aria-hidden="true"></span>
-        <span>Bengaluru, India</span>
-      </header>
-
-      <div class="message">
-        <h1 id="hero-title" class="display h-hero">Hello from Bengaluru.</h1>
-        <p class="lead">{site.positioning}</p>
-        <p class="muted measure">{site.bio}</p>
-        <p class="sign">
-          <span class="pixel">{site.name}</span>
-          <span class="muted">{site.role}, {site.employer}</span>
-        </p>
-      </div>
-
-      <aside class="address" aria-label="Postmark and address">
-        <div class="stamp-zone" data-stamp-press tabindex="0" role="button" aria-label="Press the stamp">
-          <div class="pm"><Postmark id="pm-hero" /></div>
-          <Stamp class="st" caption="Bengaluru" value="2026" />
-        </div>
-        <ul class="lines">
-          <li><span class="label muted">To</span><span>You, kindly reading</span></li>
-          <li><span class="label muted">From</span><span>{site.name}</span></li>
-          <li><span class="label muted">Does</span><span>Enterprise UX for AI and platforms</span></li>
-          <li><span class="label muted">Also</span><span>Figma Community Lead, Bangalore</span></li>
-        </ul>
-      </aside>
-    </article>
+    <Envelope />
   </section>
 
   <section class="wrap block" aria-labelledby="notes-h">
@@ -65,26 +35,10 @@ const rooms = nav.filter((n) => n.href !== '/');
     </ul>
   </section>
 </Base>
+<script>import '../scripts/live.ts';</script>
 
 <style>
-  .hero { padding-block: var(--space-6) var(--space-8); }
-  .postcard {
-    position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: "top top" "message address";
-    gap: var(--space-6) var(--space-7);
-    padding: var(--space-6) var(--space-7) var(--space-7);
-    background: var(--color-surface); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1);
-    box-shadow: var(--shadow-card);
-  }
-  .top { grid-area: top; display: flex; align-items: center; gap: var(--space-3); }
-  .top__rule { flex: 1; border-top: var(--border) solid var(--color-line); }
-  .message { grid-area: message; display: flex; flex-direction: column; gap: var(--space-5); }
-  .sign { display: grid; gap: 0.15rem; margin-top: auto; padding-top: var(--space-6); }
-  .sign .pixel { font-size: var(--step-1); }
-  .address { grid-area: address; display: grid; align-content: start; gap: var(--space-6); border-left: var(--border) solid var(--color-line); padding-left: var(--space-7); }
-  .stamp-zone { position: relative; display: grid; justify-items: end; padding-top: 4.5rem; cursor: pointer; border-radius: var(--radius-1); }
-  .stamp-zone .st { width: min(52%, 11rem); transform: rotate(2.5deg); }
-  .stamp-zone .pm { position: absolute; width: 86%; left: 0; top: 0; z-index: 2; pointer-events: none; }
-  .lines li { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--space-3); align-items: baseline; padding-block: var(--space-3) var(--space-2); border-bottom: var(--border) solid var(--color-line); }
+  .hero { padding-block: var(--space-4) var(--space-9); }
 
   .block { padding-bottom: var(--space-8); display: grid; gap: var(--space-5); }
   .block__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }

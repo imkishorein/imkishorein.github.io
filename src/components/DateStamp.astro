@@ -1,0 +1,33 @@
+---
+// A small perforated date stamp. Two shapes:
+//  - date: a big main line and a small line under it ("19" / "OCT 2026")
+//  - span: start, a hand-drawn line with a dot at each end, then end ("2022" | "2025", or "NOW")
+//    For NOW the end dot is the accent colour and pulses softly: the range is still running.
+// Tilts on row hover like the note stamps always did.
+interface Props { main: string; sub?: string; to?: string; wide?: boolean; class?: string; }
+const { main, sub = '', to = '', wide = false, class: cls = '' } = Astro.props;
+const live = to.toUpperCase() === 'NOW';
+---
+<div class:list={['stamp-shadow', 'date-stamp', cls]}>
+  <div class="stamp"><div class:list={['stamp__inner', 'pixel', { wide, live }]}><span class="d">{main}</span>{to ? (<><span class="sr-only">to</span><span class="tl" aria-hidden="true"></span><span class="e">{to}</span></>) : <span class="m">{sub || '\u00a0'}</span>}</div></div>
+</div>
+<style>
+  .date-stamp { width: 6.75rem; transition: transform var(--dur-med) var(--ease-press); }
+  :global(.row:hover) .date-stamp { transform: rotate(-4deg) translateY(-2px); }
+  .stamp { --perf-pitch: 12px; --perf-radius: 3px; padding: 0.55rem; }
+  .stamp__inner { display: grid; justify-items: center; align-content: center; padding: var(--space-2); line-height: 1; gap: 0.3rem; min-height: 5.2rem; }
+  .d { font-size: var(--step-2); }
+  .wide .d { font-size: var(--step-1); } /* four-digit years need a little less size to sit inside the frame */
+  .e { font-size: var(--step-0); }
+  /* the run between start and end: a hand-drawn stroke with a dot at each end */
+  .tl { position: relative; width: 12px; height: 1.4rem; background: radial-gradient(circle 2.5px at 50% 2.5px, var(--color-text-muted) 98%, transparent); }
+  .tl::before { content: ""; position: absolute; inset: 2.5px 0; background: var(--color-text-muted); -webkit-mask: url("/line-v.svg") center top / 12px var(--rule-tile) no-repeat; mask: url("/line-v.svg") center top / 12px var(--rule-tile) no-repeat; }
+  .tl::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--color-text-muted); }
+  .live .tl::after { background: var(--color-accent); outline: 1px solid var(--color-text-muted); }
+  @media (prefers-reduced-motion: no-preference) {
+    .live .tl::after { animation: ds-pulse 2.4s var(--ease-out) infinite; }
+    @keyframes ds-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--color-selection); } 60% { box-shadow: 0 0 0 0.4rem transparent; } }
+  }
+  .m { white-space: nowrap; font-size: var(--step--2); color: var(--color-text-muted); }
+  @media (prefers-reduced-motion: reduce) { .date-stamp { transition: none; } :global(.row:hover) .date-stamp { transform: none; } }
+</style>

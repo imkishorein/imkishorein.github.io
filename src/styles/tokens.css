@@ -35,12 +35,18 @@
   --color-on-strong:     light-dark(var(--palette-paper), var(--palette-olive));
   --color-line:          light-dark(color-mix(in oklab, var(--palette-olive) 34%, transparent), color-mix(in oklab, var(--palette-paper) 30%, transparent));
   --color-line-strong:   light-dark(color-mix(in oklab, var(--palette-olive) 80%, transparent), color-mix(in oklab, var(--palette-paper) 80%, transparent));
-  --color-rule:          light-dark(color-mix(in oklab, var(--palette-olive) 72%, transparent), color-mix(in oklab, var(--palette-paper) 68%, transparent)); /* dashed separators on the page grid */
-  --color-grid:          light-dark(color-mix(in oklab, var(--palette-olive) 8%, transparent), color-mix(in oklab, var(--palette-paper) 6%, transparent));
+  --color-rule:          light-dark(color-mix(in oklab, var(--palette-olive) 34%, transparent), color-mix(in oklab, var(--palette-paper) 30%, transparent)); /* dashed row separators, kept soft */
+  --color-grid:          light-dark(color-mix(in oklab, var(--palette-olive) 26%, transparent), color-mix(in oklab, var(--palette-paper) 20%, transparent)); /* dot colour, kept faint */
   --color-ink-faded:     light-dark(color-mix(in oklab, var(--palette-olive) 66%, transparent), color-mix(in oklab, var(--palette-paper) 66%, transparent)); /* postmarks */
   --color-focus:         light-dark(var(--palette-olive), var(--palette-sage));
   --color-selection:     color-mix(in oklab, var(--palette-sage) 70%, transparent);
   --color-shadow:        light-dark(color-mix(in oklab, var(--palette-olive) 45%, transparent), color-mix(in oklab, black 55%, transparent));
+
+  /* Illustration colours for stamps. Fixed on purpose: a stamp is a physical object,
+     so its art does not flip with light or dark mode. */
+  --art-deep:  var(--palette-olive);
+  --art-mid:   var(--palette-sage);
+  --art-light: var(--palette-paper);
 
   /* ───────── 2. FONT ROLES ─────────
      Family names come from fonts.css. */
@@ -85,7 +91,7 @@
   --page-max: 72rem;
   --measure:  62ch;
   --gutter:   clamp(1rem, 4vw, 2.5rem);
-  --grid-size: 4rem;           /* background grid cell */
+  --grid-tile: 640px;          /* size of the repeating hand-dabbed dot tile (public/dots.svg) */
 
   /* ───────── 3. SHAPE ───────── */
   --radius-1: 2px;
@@ -96,11 +102,16 @@
   --perf-radius: 4px;
   --perf-pitch:  16px;
 
-  /* separators that sit on the page grid (see .rule-* in global.css) */
-  --rule-weight: 2px;   /* thickness, always thicker than the grid hairline */
-  --rule-dash:   6px;
-  --rule-gap:    4px;
-  --rule-halo:   5px;   /* grid is knocked out this far either side of a rule */
+  /* hand-drawn lines (public/line-*.svg, see global.css): tile size must match the SVG files */
+  --rule-height: 12px;
+  --rule-tile: 1200px;
+
+  /* airmail envelope border (hero) */
+  --airmail-width: 0.95rem;
+  /* stripe widths are deliberately uneven, like a hand-ruled border */
+  --airmail-stripes: repeating-linear-gradient(-45deg,
+    var(--color-accent) 0 1.15rem, var(--color-surface) 1.15rem 1.65rem, var(--color-strong) 1.65rem 2.7rem, var(--color-surface) 2.7rem 3.45rem,
+    var(--color-accent) 3.45rem 4.45rem, var(--color-surface) 4.45rem 4.9rem, var(--color-strong) 4.9rem 5.8rem, var(--color-surface) 5.8rem 6.5rem);
 
   --shadow-card: 0 1px 0 var(--color-line), 0 26px 36px -28px var(--color-shadow);
   --shadow-stamp: 0 10px 14px -8px var(--color-shadow);

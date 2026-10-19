@@ -15,13 +15,8 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  position: relative;
   background-color: var(--color-bg);
-  /* the grid: two hairline gradients, driven by tokens */
-  background-image:
-    linear-gradient(var(--color-grid) var(--border), transparent var(--border)),
-    linear-gradient(90deg, var(--color-grid) var(--border), transparent var(--border));
-  background-size: var(--grid-size) var(--grid-size);
-  background-position: center top;
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--step-0);
@@ -29,6 +24,14 @@ body {
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+/* the grid: hand-dabbed dots. public/dots.svg is only a mask, so the colour is --color-grid.
+   It sits behind everything and never takes pointer events. */
+body::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--color-grid);
+  -webkit-mask: url("/dots.svg") center top / var(--grid-tile) var(--grid-tile) repeat;
+  mask: url("/dots.svg") center top / var(--grid-tile) var(--grid-tile) repeat;
 }
 main { flex: 1; }
 ::selection { background: var(--color-selection); }
@@ -64,7 +67,7 @@ main { flex: 1; }
 .prose p, .prose li { text-wrap: pretty; }
 .prose ul { list-style: none; display: grid; gap: var(--space-2); }
 .prose ul li { padding-left: var(--space-5); position: relative; }
-.prose ul li::before { content: ""; position: absolute; left: 0; top: 0.72em; width: 0.6rem; border-top: var(--border) solid var(--color-line-strong); }
+.prose ul li::before { position: absolute; left: 0; top: calc(0.72em - var(--rule-height) / 2); width: 0.6rem; }
 .prose a { text-decoration-thickness: var(--border); text-underline-offset: 0.2em; text-decoration-color: var(--color-line-strong); }
 .prose a:hover { text-decoration-color: currentColor; }
 .prose code { font-family: var(--font-mono); font-size: 0.9em; background: var(--color-surface-sunken); padding: 0.1em 0.35em; border-radius: var(--radius-1); }
@@ -72,24 +75,45 @@ main { flex: 1; }
 /* ───────── page header ───────── */
 .page-head { padding-block: var(--space-8) var(--space-7); display: grid; gap: var(--space-4); }
 .page-head .kicker { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--color-text-muted); }
-.page-head .kicker::after { content: ""; width: 3rem; border-top: var(--border) solid var(--color-line-strong); }
+.page-head .kicker::after { width: 3rem; }
 
-/* ───────── rules: the one way to draw a separator on the page grid ─────────
-   The grid is a 1px faint solid hairline. Rules are a different mark on purpose:
-   thicker, dashed like postal perforation, and they knock the grid out around
-   themselves. So a rule can never blur into or double up with a grid line, wherever
-   it lands. Use: add .rule-top or .rule-bottom to a block (.rows and .row already do). Add .rule-solid for a
-   strong section rule. Do not use border-top/bottom for separators on the grid.
-   (Inside a surface card there is no grid behind, so a plain border is fine.) */
-.rule-top, .rule-bottom, .rows, .row { position: relative; --rule-fill: repeating-linear-gradient(90deg, var(--color-rule) 0 var(--rule-dash), transparent 0 calc(var(--rule-dash) + var(--rule-gap))); }
-.rule-solid, .rows { --rule-fill: linear-gradient(var(--color-line-strong), var(--color-line-strong)); }
-.rule-top::before, .rows::before, .rule-bottom::after, .row::after {
-  content: ""; position: absolute; left: 0; right: 0; pointer-events: none;
-  height: calc(var(--rule-weight) + 2 * var(--rule-halo));
-  background: var(--rule-fill) center / 100% var(--rule-weight) no-repeat, var(--color-bg);
+/* ───────── lines: every straight line is drawn by hand ─────────
+   Lines are tiny hand-drawn SVGs (public/line-*.svg, generated once with fixed seeds) used as masks,
+   so the colour still comes from tokens. Solid lines are a wobbly pen stroke, dashed rules are
+   hand-struck dashes of uneven length, like postal perforation. Three variants each, so
+   neighbouring lines never repeat the same wobble.
+   Use: .rule-top or .rule-bottom on a block (.rows and .row already do), .rule-solid for a strong
+   section rule, .hand-b for a soft solid line under a block, .hand-l for a soft vertical line to the
+   left. Do not use border-top or border-bottom for a separator. */
+:root {
+  --hand-solid-a: url("/line-solid-a.svg"); --hand-solid-b: url("/line-solid-b.svg"); --hand-solid-c: url("/line-solid-c.svg");
+  --hand-dash-a: url("/line-dash-a.svg"); --hand-dash-b: url("/line-dash-b.svg"); --hand-dash-c: url("/line-dash-c.svg");
+}
+.rule-top, .rule-bottom, .rows, .row, .hand-b, .hand-l { position: relative; --rule-ink: var(--color-rule); --rule-mask: var(--hand-dash-c); }
+.rule-solid, .rows { --rule-ink: var(--color-line-strong); --rule-mask: var(--hand-solid-a); }
+.hand-b, .hand-l { --rule-ink: var(--color-line); --rule-mask: var(--hand-solid-b); }
+.row:nth-child(3n+1) { --rule-mask: var(--hand-dash-a); }
+.row:nth-child(3n+2) { --rule-mask: var(--hand-dash-b); }
+.rule-top::before, .rows::before, .rule-bottom::after, .row::after, .hand-b::after {
+  content: ""; position: absolute; left: 0; right: 0; height: var(--rule-height); pointer-events: none;
+  background: var(--rule-ink);
+  -webkit-mask: var(--rule-mask) center / var(--rule-tile) var(--rule-height) repeat-x;
+  mask: var(--rule-mask) center / var(--rule-tile) var(--rule-height) repeat-x;
 }
 .rule-top::before, .rows::before { top: 0; transform: translateY(-50%); }
-.rule-bottom::after, .row::after { bottom: 0; transform: translateY(50%); }
+.rule-bottom::after, .row::after, .hand-b::after { bottom: 0; transform: translateY(50%); }
+.hand-l::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--rule-height); transform: translateX(-50%); pointer-events: none;
+  background: var(--rule-ink);
+  -webkit-mask: url("/line-v.svg") center / var(--rule-height) var(--rule-tile) repeat-y;
+  mask: url("/line-v.svg") center / var(--rule-height) var(--rule-tile) repeat-y;
+}
+/* short hand-drawn dashes: kicker tail, list bullets */
+.page-head .kicker::after, .prose ul li::before {
+  content: ""; height: var(--rule-height); background: var(--color-line-strong); pointer-events: none;
+  -webkit-mask: var(--hand-solid-c) left center / var(--rule-tile) var(--rule-height) no-repeat;
+  mask: var(--hand-solid-c) left center / var(--rule-tile) var(--rule-height) no-repeat;
+}
 
 /* ───────── rows (notes, stuff, timeline) ───────── */
 .row { display: grid; grid-template-columns: 9rem 1fr auto; gap: var(--space-5); align-items: baseline; padding-block: var(--space-5); }
