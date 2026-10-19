@@ -7,7 +7,7 @@ const day = d.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'UTC' });
 const mon = d.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }).toUpperCase();
 const yr = d.getUTCFullYear();
 ---
-<li class="row note">
+<li class="row note" data-sound-hover="rustle">
   <div class="stamp-shadow date">
     <div class="stamp"><div class="stamp__inner pixel"><span class="d">{day}</span><span class="m">{mon} {yr}</span></div></div>
   </div>

@@ -26,7 +26,7 @@ Rule: if it is not in `docs/`, it did not happen. Before a brainstorm ends, offe
 1. Design tokens are declared once. All colours, fonts, type scale, spacing, shape, motion and sound volume live in `src/styles/tokens.css`. The only file that names font files is `src/styles/fonts.css`. Components use semantic roles (`--color-bg`, `--color-text`, `--font-sans`...) and never raw hex or font names. Swapping a font or recolouring must be a change in those two files only. `check:tokens` enforces this and fails the build.
    - Only exception: `public/favicon.svg` cannot read CSS variables and keeps its own hex values.
 2. Writing style for anything user-facing: no em dashes, no Oxford commas, human and direct tone, no corporate filler.
-3. Sound is off by default and synthesised with Web Audio (no audio files). Volume comes from `--sound-volume`. State keys in localStorage: `imk:theme`, `imk:sound`.
+3. Sound is off by default and synthesised with Web Audio (no audio files), through one master bus. Sounds are named (`tick`, `switch`, `thunk`, `rustle`, `on`) and attached with `data-sound` (press) or `data-sound-hover` (mouse hover). Volume comes from `--sound-volume`. State keys in localStorage: `imk:theme`, `imk:sound`.
 4. Respect `prefers-reduced-motion` for every new animation.
 5. Do not invent facts about Kishore. Anything not confirmed is marked placeholder. See `docs/OPEN-ITEMS.md`.
 
@@ -39,7 +39,7 @@ Reference sites: hvpandya.com (Stuff page, notes) and charmiekapoor.com. Micro i
 - `src/data/site.ts`: name, bio, links, nav (with Japanese sublabels), timeline, community roles, stuff list
 - `src/content/notes/*.md`: notes (fields in `src/content.config.ts`: title, date, category, summary, placeholder, draft)
 - `src/pages`: Home, Notes, Stuff, About are live. Work, Community, Photography are "coming soon" stubs.
-- `src/components`: Postmark, Stamp (CSS mask perforation), Nav (includes the theme switch), Controls (sound toggle), Footer, PageHead, NoteRow, ComingSoon
+- `src/components`: Postmark, Stamp (CSS mask perforation), Nav (includes the theme switch), Controls (theme and sound switches, rendered in Nav), Footer, PageHead, NoteRow, ComingSoon
 - `src/scripts/site.ts`: theme switch, sound synth, stamp interactions, hanko easter egg
 - `TOKENS.md`: how to change colours and fonts
 

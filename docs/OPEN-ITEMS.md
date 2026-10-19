@@ -29,6 +29,7 @@
 - Type specimen page to compare font pairings live
 - Stuff page modelled on hvpandya.com
 - More postcard/stamp pieces per section, per-note stamps
+- Haptics on link clicks and Easter eggs (phones only, see `IDEAS.md`). Open: share the Sound toggle or add its own, and which Easter eggs get it.
 
 ## Workflow setup
 - [ ] Push this repo to a private GitHub repo so cloud sessions, phone and teleport use the same files

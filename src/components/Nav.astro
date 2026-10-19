@@ -1,5 +1,6 @@
 ---
 import { nav, site } from '../data/site';
+import Controls from './Controls.astro';
 const path = Astro.url.pathname;
 const isCurrent = (href: string) => path === href || path.startsWith(href);
 ---
@@ -19,10 +20,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
       ))}
     </ul>
   </nav>
-  <button type="button" class="theme pixel" data-theme-toggle aria-pressed="false" aria-label="Colour mode" data-sound="tick">
-    <span class="track" aria-hidden="true"><span class="knob"></span></span>
-    <span data-theme-label>Light</span>
-  </button>
+  <Controls />
 </header>
 <style>
   .bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-4) var(--space-6); padding-block: var(--space-5) var(--space-3); }
@@ -32,11 +30,6 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
   .link:hover, .link:focus-visible, .link.current { color: var(--color-text); }
   .link::after { content: ""; position: absolute; left: 0; right: 0; bottom: var(--space-5); border-top: var(--border) solid var(--color-line-strong); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-med) var(--ease-out); }
   .link:hover::after, .link:focus-visible::after, .link.current::after { transform: scaleX(1); }
-  .theme { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--step--1); color: var(--color-text); padding: var(--space-1) var(--space-2); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1); }
-  .track { position: relative; width: 2rem; height: 1rem; border: var(--border) solid var(--color-line-strong); border-radius: 1rem; background: var(--color-accent); }
-  .knob { position: absolute; top: 1px; left: 1px; width: calc(1rem - 4px); height: calc(1rem - 4px); border-radius: 50%; background: var(--color-strong); transition: transform var(--dur-med) var(--ease-press); }
-  .theme[aria-pressed="true"] .knob { transform: translateX(1rem); }
-  @media (prefers-reduced-motion: reduce) { .knob { transition: none; } }
   @media (max-width: 40rem) { ul { gap: var(--space-1) var(--space-5); } .link { padding-block: var(--space-2) var(--space-5); } }
   .jp { position: absolute; left: 0; bottom: 0; font-size: var(--step--1); color: var(--color-accent-ink); opacity: 0; transform: translateY(-3px); transition: opacity var(--dur-med), transform var(--dur-med) var(--ease-out); }
   .link:hover .jp, .link:focus-visible .jp, .link.current .jp { opacity: 1; transform: none; }

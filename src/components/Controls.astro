@@ -1,12 +1,24 @@
 ---
-// Sound toggle (the theme switch lives in the Nav). Behaviour lives in src/scripts/site.ts.
+// Theme and sound switches, shown in the Nav. Behaviour lives in src/scripts/site.ts.
+// Names stay fixed; aria-pressed carries the state (theme pressed = dark, sound pressed = on).
 ---
 <div class="controls">
-  <button type="button" class="ctl pixel" data-sound-toggle aria-pressed="false"><span data-sound-label>Sound off</span></button>
+  <button type="button" class="ctl pixel" data-theme-toggle aria-pressed="false" aria-label="Dark mode">
+    <span class="track" aria-hidden="true"><span class="knob"></span></span>
+    <span aria-hidden="true" data-theme-label>Light</span>
+  </button>
+  <button type="button" class="ctl pixel" data-sound-toggle aria-pressed="false" aria-label="Sound">
+    <span class="track" aria-hidden="true"><span class="knob"></span></span>
+    <span aria-hidden="true">Sound <span data-sound-state>Off</span></span>
+  </button>
 </div>
 <style>
   .controls { display: flex; gap: var(--space-3); flex-wrap: wrap; }
-  .ctl { font-size: var(--step--1); padding: var(--space-1) var(--space-3); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1); color: var(--color-text); transition: background var(--dur-fast), color var(--dur-fast); }
+  .ctl { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--step--1); padding: var(--space-1) var(--space-2); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1); color: var(--color-text); transition: background var(--dur-fast), color var(--dur-fast); }
   .ctl:hover { background: var(--color-strong); color: var(--color-on-strong); }
-  .ctl[aria-pressed="true"] { background: var(--color-accent); color: var(--color-on-accent); border-color: var(--color-accent); }
+  .track { position: relative; width: 2rem; height: 1rem; border: var(--border) solid currentColor; border-radius: 1rem; background: var(--color-surface-sunken); transition: background var(--dur-med); }
+  .knob { position: absolute; top: 1px; left: 1px; width: calc(1rem - 4px); height: calc(1rem - 4px); border-radius: 50%; background: currentColor; transition: transform var(--dur-med) var(--ease-press); }
+  .ctl[aria-pressed="true"] .track { background: var(--color-accent); }
+  .ctl[aria-pressed="true"] .knob { transform: translateX(1rem); }
+  @media (prefers-reduced-motion: reduce) { .track, .knob { transition: none; } }
 </style>

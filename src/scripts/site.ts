@@ -24,70 +24,138 @@ themeBtn?.addEventListener('click', () => {
   root.dataset.theme = next;
   store.set('imk:theme', next);
   paintTheme();
-  play('tick');
+  play('switch');
 });
 paintTheme();
 
-/* ───────── sound (synthesised, no files, off by default) ───────── */
+/* ───────── sound (synthesised, no files, off by default) ─────────
+   One master bus (gain, soft low-pass, compressor) so every sound shares the same
+   warmth and can never spike. Each sound gets a small random pitch shift so quick
+   repeats feel like paper, not a machine. Volume is read from --sound-volume. */
 let ctx: AudioContext | null = null;
+let bus: GainNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
 let soundOn = store.get('imk:sound') === 'on';
 const volume = () => {
   const v = parseFloat(getComputedStyle(root).getPropertyValue('--sound-volume'));
   return Number.isFinite(v) ? Math.min(Math.max(v, 0), 1) : 0.1;
 };
-const audio = () => {
-  if (!ctx) { const C = window.AudioContext || (window as any).webkitAudioContext; if (C) ctx = new C(); }
-  if (ctx?.state === 'suspended') void ctx.resume();
-  return ctx;
+/* gesture: true from a click or press (may create and resume the context).
+   gesture: false from hover: only plays if audio is already running, because a
+   suspended context would queue the sound and play it late on the next click. */
+const audio = (gesture: boolean) => {
+  if (!ctx) {
+    if (!gesture) return null;
+    const C = window.AudioContext || (window as any).webkitAudioContext;
+    if (!C) return null;
+    ctx = new C();
+    bus = ctx.createGain();
+    const soften = ctx.createBiquadFilter(); soften.type = 'lowpass'; soften.frequency.value = 7000;
+    const guard = ctx.createDynamicsCompressor();
+    bus.connect(soften).connect(guard).connect(ctx.destination);
+  }
+  if (ctx.state === 'suspended' && gesture) void ctx.resume();
+  return gesture || ctx.state === 'running' ? ctx : null;
 };
-const noise = (c: AudioContext, seconds: number) => {
-  const buf = c.createBuffer(1, Math.ceil(c.sampleRate * seconds), c.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  const src = c.createBufferSource(); src.buffer = buf; return src;
+const noise = (c: AudioContext, seconds: number, at: number) => {
+  if (!noiseBuf) { // one shared second of white noise, built once
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const src = c.createBufferSource(); src.buffer = noiseBuf;
+  src.start(at, Math.random() * (1 - seconds), seconds);
+  return src;
 };
-type Sound = 'tick' | 'thunk' | 'on';
-function play(kind: Sound, force = false) {
-  if (!soundOn && !force) return;
-  const c = audio(); if (!c) return;
+type Sound = 'tick' | 'switch' | 'thunk' | 'rustle' | 'on';
+function play(kind: Sound, hover = false) {
+  if (!soundOn) return;
+  const c = audio(!hover); if (!c || !bus) return;
   const t = c.currentTime, v = volume();
-  const out = c.createGain(); out.connect(c.destination);
-  if (kind === 'tick') { // light paper tap
-    const n = noise(c, 0.04), f = c.createBiquadFilter();
-    f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = 1.2;
-    out.gain.setValueAtTime(v * 0.9, t); out.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
-    n.connect(f).connect(out); n.start(t);
+  const j = 0.96 + Math.random() * 0.08; // pitch jitter, ±4%
+  const env = (g: GainNode, peak: number, dur: number, attack = 0.002, at = t) => {
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), at + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  };
+  const click = (hz: number, peak: number, dur: number, at: number) => { // filtered noise burst
+    const n = noise(c, dur, at), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = 'bandpass'; f.frequency.value = hz * j; f.Q.value = 1.2;
+    env(g, peak, dur, 0.001, at);
+    n.connect(f).connect(g).connect(bus!);
+  };
+  if (kind === 'tick') { // light paper tap: links
+    click(2600, v * 0.9, 0.04, t);
+  } else if (kind === 'switch') { // two-stage toggle click: theme and sound switches
+    click(1500, v * 0.9, 0.03, t);
+    click(3100, v * 0.7, 0.035, t + 0.05);
   } else if (kind === 'thunk') { // rubber stamp press
-    const o = c.createOscillator(); o.type = 'sine';
-    o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.14);
-    out.gain.setValueAtTime(v * 2.2, t); out.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-    o.connect(out); o.start(t); o.stop(t + 0.18);
-    const n = noise(c, 0.06), f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 700;
-    const g = c.createGain(); g.gain.setValueAtTime(v * 1.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
-    n.connect(f).connect(g).connect(c.destination); n.start(t);
-  } else { // soft two-note confirmation
+    const o = c.createOscillator(), g = c.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(140 * j, t); o.frequency.exponentialRampToValueAtTime(48 * j, t + 0.14);
+    env(g, v * 2.2, 0.16, 0.003);
+    o.connect(g).connect(bus); o.start(t); o.stop(t + 0.18);
+    const n = noise(c, 0.06, t), f = c.createBiquadFilter(), ng = c.createGain();
+    f.type = 'lowpass'; f.frequency.value = 700;
+    env(ng, v * 1.2, 0.06, 0.002);
+    n.connect(f).connect(ng).connect(bus);
+  } else if (kind === 'rustle') { // faint paper brush: hover on a note
+    const n = noise(c, 0.14, t), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = 'bandpass'; f.frequency.value = 5200 * j; f.Q.value = 0.7;
+    env(g, v * 0.45, 0.14, 0.05);
+    n.connect(f).connect(g).connect(bus);
+  } else { // soft two-note confirmation: sound switched on
     [660, 990].forEach((hz, i) => {
       const o = c.createOscillator(), g = c.createGain(); o.type = 'triangle'; o.frequency.value = hz;
-      g.gain.setValueAtTime(0.0001, t + i * 0.09); g.gain.exponentialRampToValueAtTime(v * 0.8, t + i * 0.09 + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + 0.22);
-      o.connect(g).connect(c.destination); o.start(t + i * 0.09); o.stop(t + i * 0.09 + 0.25);
+      env(g, v * 0.8, 0.22, 0.01, t + i * 0.09);
+      o.connect(g).connect(bus!); o.start(t + i * 0.09); o.stop(t + i * 0.09 + 0.25);
     });
   }
 }
+
 const soundBtn = document.querySelector<HTMLButtonElement>('[data-sound-toggle]');
-const soundLabel = document.querySelector<HTMLElement>('[data-sound-label]');
+const soundState = document.querySelector<HTMLElement>('[data-sound-state]');
 const paintSound = () => {
   soundBtn?.setAttribute('aria-pressed', String(soundOn));
-  if (soundLabel) soundLabel.textContent = soundOn ? 'Sound on' : 'Sound off';
+  if (soundState) soundState.textContent = soundOn ? 'On' : 'Off';
 };
 soundBtn?.addEventListener('click', () => {
   soundOn = !soundOn; store.set('imk:sound', soundOn ? 'on' : 'off'); paintSound();
-  if (soundOn) play('on', true);
+  if (soundOn) play('on');
 });
 paintSound();
+
+/* Links and buttons with data-sound. The sound fires as early as the input allows,
+   because a link click starts a page load that can cut a sound off:
+   mouse on press, touch and pen on release (a scroll cancels it, so scrolling past a
+   link stays silent), keyboard on click. The click that follows a pointer sound is skipped. */
+let lastPointerSound = 0;
+const soundTarget = (e: Event) => (e.target as Element | null)?.closest<HTMLElement>('[data-sound]');
+const soundFor = (e: PointerEvent | MouseEvent) => {
+  const el = soundTarget(e);
+  if (el && !e.shiftKey) play(el.dataset.sound as Sound); // shift-click belongs to the hanko
+  return !!el && !e.shiftKey;
+};
+document.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'mouse' && e.button === 0 && soundFor(e)) lastPointerSound = performance.now();
+});
+document.addEventListener('pointerup', (e) => {
+  if (e.pointerType !== 'mouse' && soundFor(e)) lastPointerSound = performance.now();
+});
 document.addEventListener('click', (e) => {
-  const el = (e.target as Element | null)?.closest<HTMLElement>('[data-sound]');
-  if (el) play(el.dataset.sound as Sound);
+  if (performance.now() - lastPointerSound < 800) return;
+  soundFor(e);
+});
+
+/* Hover sounds (mouse only, throttled): data-sound-hover="rustle" */
+let lastHover = 0;
+document.querySelectorAll<HTMLElement>('[data-sound-hover]').forEach((el) => {
+  el.addEventListener('pointerenter', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const now = performance.now();
+    if (now - lastHover < 160) return;
+    lastHover = now;
+    play(el.dataset.soundHover as Sound, true);
+  });
 });
 
 /* ───────── stamp press: click the hero stamp to re-postmark ───────── */
@@ -99,7 +167,7 @@ document.querySelectorAll<HTMLElement>('[data-stamp-press]').forEach((el) => {
     el.animate([{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(4px) rotate(-1deg)' }, { transform: 'translateY(0) rotate(0)' }], { duration: 260, easing: 'cubic-bezier(.5,0,.2,1.4)' });
     mark?.animate([{ opacity: 0.2, transform: 'scale(1.18) rotate(-6deg)' }, { opacity: 1, transform: 'scale(1) rotate(0)' }], { duration: 380, easing: 'cubic-bezier(.2,.7,.2,1)' });
   };
-  el.addEventListener('click', press);
+  el.addEventListener('click', (e) => { if (!(e as MouseEvent).shiftKey) press(); }); // shift-click is the hanko
   el.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); press(); } });
 });
 

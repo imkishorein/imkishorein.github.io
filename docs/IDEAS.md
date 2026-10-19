@@ -132,3 +132,9 @@ From screenshots of the LinkedIn profile, as raw material for the Home, About an
 - Placeholders to replace: email, GitHub, Instagram and Figma links, portrait (stamp shows a drawn landscape), Stuff items other than the camera gear, both seed notes, short bio.
 - Drafted by me from the LinkedIn material, so review the wording: About paragraphs, "How I work", and the 8+ years figure.
 - Not done yet: deployment to Cloudflare Pages, real photos, case studies, Community content, OG image.
+
+**Haptics (19 Oct 2026)**
+
+- Idea: haptic feedback on link clicks, plus hidden haptics for the Easter egg interactions (stamp press, shift-click hanko, nav Japanese labels revealing).
+- Constraint: web haptics only work on touch phones. Android vibrates via `navigator.vibrate`. iPhone Safari needs a hidden `<input type="checkbox" switch>` trick. MacBook trackpad haptics are native-app only, so desktop gets nothing from a website. Desktop equivalent is the synthesised sound.
+- Leaning: pair each interaction's sound with a vibration pattern, controlled by the same footer toggle as sound (off by default). Not decided. Parked to revisit later.
