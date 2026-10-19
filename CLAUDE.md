@@ -4,6 +4,9 @@ Kishore Vidyasagar's personal site. Senior UX Designer at Salesforce (Agentforce
 
 Kishore is a designer who vibe-codes, not a professional developer. Prefer working code with minimal boilerplate and explain the why briefly. Be direct, peer-level, and ask a question when the request is ambiguous instead of assuming.
 
+## Source of truth for ideas
+`docs/WEBSITE-PLAN.md` is an export of the living Claude Doc "imkishore.in: Website Plan" (exported 19 Oct 2026, rev 21). It holds the goals, reference-site analysis, stack and hosting reasoning, information architecture, the full ideas log, font pairing research, LinkedIn source material for About and the v1 build notes. Read it before making design or content decisions. Never overwrite or reinterpret Kishore's ideas in it. The live doc may be newer: https://claude.ai/code/artifact/800b2d43-ef2c-46c4-beda-2b8b76714b24
+
 ## Commands
 - `npm install` then `npm run dev` (http://localhost:4321)
 - `npm run build` runs `check:tokens` first, then `astro build` to `dist/`
