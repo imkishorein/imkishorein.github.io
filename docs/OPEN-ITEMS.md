@@ -29,3 +29,8 @@
 - Type specimen page to compare font pairings live
 - Stuff page modelled on hvpandya.com
 - More postcard/stamp pieces per section, per-note stamps
+
+## Workflow setup
+- [ ] Push this repo to a private GitHub repo so cloud sessions, phone and teleport use the same files
+- [ ] Check that a local Claude Code session sees the claude.ai connectors (Docs, Figma, Drive) and personal skills. A cloud session does.
+- [ ] Try `/brainstorm`, `/idea` and `/decide` in a fresh session and tune the skills

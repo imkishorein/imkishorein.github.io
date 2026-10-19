@@ -4,8 +4,18 @@ Kishore Vidyasagar's personal site. Senior UX Designer at Salesforce (Agentforce
 
 Kishore is a designer who vibe-codes, not a professional developer. Prefer working code with minimal boilerplate and explain the why briefly. Be direct, peer-level, and ask a question when the request is ambiguous instead of assuming.
 
-## Source of truth for ideas
-`docs/WEBSITE-PLAN.md` is an export of the living Claude Doc "imkishore.in: Website Plan" (exported 19 Oct 2026, rev 21). It holds the goals, reference-site analysis, stack and hosting reasoning, information architecture, the full ideas log, font pairing research, LinkedIn source material for About and the v1 build notes. Read it before making design or content decisions. Never overwrite or reinterpret Kishore's ideas in it. The live doc may be newer: https://claude.ai/code/artifact/800b2d43-ef2c-46c4-beda-2b8b76714b24
+## How we work
+Claude Code in this repo is the one place for brainstorming and building. Ideas and decisions live in `docs/`, not in chat and not in the Claude Doc.
+- `docs/IDEAS.md`: append-only dated log of Kishore's ideas. Read the relevant part when a topic comes up. Never rewrite, reorder or reinterpret existing entries.
+- `docs/DECISIONS.md`: settled choices with the reason. Loaded below.
+- `docs/OPEN-ITEMS.md`: what is still needed or undecided. Loaded below.
+- `docs/WEBSITE-PLAN.md`: frozen export of the original Claude Doc (rev 21, 19 Oct 2026). Background only. Do not edit.
+- Skills: `/brainstorm` to think out loud with no code changes, `/idea` to log an idea, `/decide` to log a decision.
+
+Rule: if it is not in `docs/`, it did not happen. Before a brainstorm ends, offer to log new ideas and decisions. Do not log without Kishore's yes unless he said "log it". When a decision changes a hard rule or the design direction below, update this file in the same change, after asking.
+
+@docs/DECISIONS.md
+@docs/OPEN-ITEMS.md
 
 ## Commands
 - `npm install` then `npm run dev` (http://localhost:4321)
