@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { note: CollectionEntry<'notes'>; }
+const { note } = Astro.props;
+const d = note.data.date;
+const day = d.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'UTC' });
+const mon = d.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+const yr = d.getUTCFullYear();
+---
+<li class="row note">
+  <div class="stamp-shadow date">
+    <div class="stamp"><div class="stamp__inner pixel"><span class="d">{day}</span><span class="m">{mon} {yr}</span></div></div>
+  </div>
+  <div class="text">
+    <h3 class="title display"><a href={`/notes/${note.id}/`} data-sound="tick">{note.data.title}</a></h3>
+    <p class="muted">{note.data.summary}</p>
+  </div>
+  <p class="meta label muted">{note.data.category}{note.data.placeholder && <span class="ph"> · placeholder</span>}</p>
+</li>
+<style>
+  .note { grid-template-columns: 6.5rem 1fr auto; align-items: center; }
+  .date { width: 5.5rem; transition: transform var(--dur-med) var(--ease-press); }
+  .note:hover .date { transform: rotate(-4deg) translateY(-2px); }
+  .stamp { --perf-pitch: 12px; --perf-radius: 3px; padding: 0.55rem; }
+  .stamp__inner { display: grid; justify-items: center; padding: var(--space-2) 0; line-height: 1; gap: 0.3rem; }
+  .d { font-size: var(--step-2); }
+  .m { font-size: var(--step--2); color: var(--color-text-muted); }
+  .title { font-size: var(--step-1); letter-spacing: -0.02em; line-height: var(--leading-snug); font-weight: 600; }
+  .title a { text-decoration: none; }
+  .title a::after { content: ""; position: absolute; inset: 0; }
+  .note { position: relative; }
+  .title a:hover { text-decoration: underline; text-decoration-thickness: var(--border); text-underline-offset: 0.2em; }
+  .text { display: grid; gap: var(--space-1); }
+  @media (max-width: 40rem) { .note { grid-template-columns: 5.5rem 1fr; } .meta { grid-column: 2; } }
+</style>

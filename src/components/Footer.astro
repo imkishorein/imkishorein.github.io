@@ -1,0 +1,32 @@
+---
+import { site } from '../data/site';
+import Controls from './Controls.astro';
+const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+---
+<footer class="wrap foot">
+  <div class="foot__top">
+    <div>
+      <p class="label muted">Say hello</p>
+      <a class="mail display" href={`mailto:${site.email}`} data-sound="thunk">{site.email}</a>
+    </div>
+    <ul class="links">
+      {site.links.map((l) => <li><a href={l.href} rel="me noopener" target={l.href.startsWith('http') ? '_blank' : undefined}>{l.label}</a></li>)}
+    </ul>
+  </div>
+  <div class="foot__bottom">
+    <p class="muted mono small">Last updated {updated}. Set in a pixel and a sans. Try shift-clicking anywhere.</p>
+    <Controls />
+    <span class="hanko" lang="ja" aria-hidden="true" title="印 (in): a seal">印</span>
+  </div>
+</footer>
+<style>
+  .foot { padding-block: var(--space-9) var(--space-6); display: grid; gap: var(--space-7); }
+  .foot__top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-6); align-items: end; }
+  .mail { font-size: var(--step-3); text-decoration: none; word-break: break-all; border-bottom: 2px solid var(--color-accent); transition: border-color var(--dur-fast); }
+  .mail:hover { border-color: var(--color-text); }
+  .links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+  .links a { text-underline-offset: 0.25em; text-decoration-color: var(--color-line-strong); }
+  .links a:hover { text-decoration-color: currentColor; }
+  .foot__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4) var(--space-5); border-top: var(--border) solid var(--color-line); padding-top: var(--space-5); }
+  .small { font-size: var(--step--1); max-width: 46ch; }
+</style>

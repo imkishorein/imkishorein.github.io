@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Stamp from '../components/Stamp.astro';
+import { site, timeline, community, howIWork } from '../data/site';
+---
+<Base title="About" description="Designer and builder working on enterprise UX for AI and platforms. Figma Community Lead, Bangalore.">
+  <PageHead jp="私" kicker="About" title={site.positioning} />
+  <section class="wrap intro">
+    <div class="prose measure">
+      <p class="lead">I am a Senior UX Designer at the intersection of Enterprise SaaS, AI and Platform Engineering, with 8+ years across startups, unicorns and global companies.</p>
+      <p>I have designed complex, data-heavy products for SREs, platform teams and banking operations, and now for Salesforce developers and admins building AI-powered applications. My focus areas are developer tools, observability, identity and access management, conversational AI and design systems.</p>
+      <p>Before design was the job, I built things. I co-founded a startup during engineering college and bootstrapped it into a revenue-generating company, then moved through UI development into product design. That mix is why I am comfortable both drawing the screen and talking to the engineer who ships it.</p>
+      <p>Outside work I lead the Friends of Figma Bangalore community, mentoring designers and hosting events that connect the design ecosystem.</p>
+    </div>
+    <Stamp class="portrait" caption="Portrait" value="soon" />
+  </section>
+
+  <section class="wrap block">
+    <h2 class="display h-section">Where I have worked</h2>
+    <ol class="rows">
+      {timeline.map((t) => (
+        <li class="row t">
+          <span class="mono muted when">{t.when}</span>
+          <div><p class="display role">{t.role}</p><p class="muted">{t.org}</p></div>
+          <p class="body">{t.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="wrap block">
+    <h2 class="display h-section">Community</h2>
+    <ul class="rows">
+      {community.map((c) => (
+        <li class="row t">
+          <span class="mono muted when">{c.when}</span>
+          <div><p class="display role">{c.role}</p><p class="muted">{c.org}</p></div>
+          <span />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap block">
+    <h2 class="display h-section">How I work</h2>
+    <ul class="prose measure">{howIWork.map((h) => <li>{h}</li>)}</ul>
+    <p class="muted measure">If you are building AI-powered, platform or enterprise products that need both systems thinking and human-centred design, <a href={`mailto:${site.email}`} data-sound="thunk">say hello</a>.</p>
+  </section>
+</Base>
+<style>
+  .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(9rem, 13rem); gap: var(--space-8); align-items: start; padding-bottom: var(--space-8); }
+  .portrait { transform: rotate(3deg); position: sticky; top: var(--space-6); }
+  .block { display: grid; gap: var(--space-5); padding-bottom: var(--space-8); }
+  .t { grid-template-columns: 9rem minmax(0, 20rem) 1fr; align-items: start; }
+  .when { font-size: var(--step--1); padding-top: 0.2rem; }
+  .role { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; line-height: var(--leading-snug); }
+  .body { text-wrap: pretty; }
+  @media (max-width: 52rem) { .intro { grid-template-columns: 1fr; } .portrait { position: static; max-width: 9rem; } .t { grid-template-columns: 1fr; } }
+</style>

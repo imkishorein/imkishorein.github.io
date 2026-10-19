@@ -1,0 +1,19 @@
+---
+import Stamp from './Stamp.astro';
+interface Props { blurb: string; }
+const { blurb } = Astro.props;
+---
+<section class="wrap soon">
+  <div class="card">
+    <p class="display h-section">On its way.</p>
+    <p class="muted measure">{blurb}</p>
+    <p class="label muted">Not posted yet</p>
+  </div>
+  <Stamp class="s" caption="Soon" value="···" />
+</section>
+<style>
+  .soon { display: grid; grid-template-columns: 1fr minmax(8rem, 12rem); gap: var(--space-7); align-items: start; padding-bottom: var(--space-8); }
+  .card { display: grid; gap: var(--space-4); padding: var(--space-6); background: var(--color-surface); border: var(--border) solid var(--color-line-strong); box-shadow: var(--shadow-card); border-radius: var(--radius-1); }
+  .s { transform: rotate(5deg); }
+  @media (max-width: 40rem) { .soon { grid-template-columns: 1fr; } .s { max-width: 9rem; } }
+</style>

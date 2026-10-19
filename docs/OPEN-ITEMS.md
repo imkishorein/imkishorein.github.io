@@ -1,0 +1,31 @@
+# Open items
+
+## Needs real content from Kishore
+- [ ] Contact email (currently placeholder hello@imkishore.in), GitHub, Instagram and Figma links
+- [ ] Portrait photo (a drawn landscape stamp is standing in)
+- [ ] Stuff list. Camera gear is real (Sony A6700, Tamron 17-70 f/2.8, Sigma 56 f/1.4). The rest is placeholder.
+- [ ] Friends of Figma Bangalore photos, numbers and reflections for Community
+- [ ] Real notes. Both seed notes are placeholders.
+- [ ] Work case studies (Work page is a stub)
+- [ ] Photography selects (Photography page is a stub)
+
+## Needs Kishore's review
+- [ ] About page prose and "How I work" were drafted from his LinkedIn text
+- [ ] "8+ years" figure on About came from his LinkedIn summary. His profile elsewhere says 7.5+. Pick one.
+- [ ] Japanese nav labels (葉書 postcard, 仕事 work, メモ notes, 仲間 community, 写真 photography, 道具 stuff, 私 about, 印 seal). Standard words, not checked by a native reader.
+- [ ] Sound volume and character were never heard by ear, only tested for errors
+
+## Decisions still open
+- [ ] Final font pairing. Interim is Geist. Second font was dictated as "Monopixel": Geist Pixel vs Geist Mono was never explicitly confirmed. Revisit with a specimen page against other sans + mono pairings.
+- [ ] OG image for link previews
+
+## Deployment
+- [ ] Push to GitHub
+- [ ] Cloudflare Pages project: build `npm run build`, output `dist`
+- [ ] Point imkishore.in DNS at Pages and add as custom domain
+- [ ] Set up the Pages Git integration so pushes deploy
+
+## Ideas parked
+- Type specimen page to compare font pairings live
+- Stuff page modelled on hvpandya.com
+- More postcard/stamp pieces per section, per-note stamps

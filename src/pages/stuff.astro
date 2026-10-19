@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { stuff } from '../data/site';
+---
+<Base title="Stuff" description="The gear and tools I use for photography, design, AI and building.">
+  <PageHead jp="道具" kicker="Stuff" title="What I use." intro="Cameras, software and hardware, kept current. Items marked placeholder still need confirming." />
+  <section class="wrap groups">
+    {stuff.map((g) => (
+      <div class="group">
+        <h2 class="display h-section">{g.group}</h2>
+        <ul class="rows">
+          {g.items.map((i) => (
+            <li class="row item">
+              <span class="display name">{i.name}</span>
+              <span class="muted">{i.note}</span>
+              {i.placeholder && <span class="label muted">placeholder</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+</Base>
+<style>
+  .groups { display: grid; gap: var(--space-7); padding-bottom: var(--space-8); }
+  .group { display: grid; grid-template-columns: 14rem 1fr; gap: var(--space-5) var(--space-7); align-items: start; }
+  .item { grid-template-columns: minmax(10rem, 18rem) 1fr auto; }
+  .name { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; }
+  @media (max-width: 52rem) { .group { grid-template-columns: 1fr; } }
+</style>

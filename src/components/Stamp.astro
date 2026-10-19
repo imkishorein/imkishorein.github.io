@@ -1,0 +1,32 @@
+---
+// A perforated stamp. Pass `src` for a portrait; without it a placeholder landscape is drawn.
+interface Props { src?: string; alt?: string; value?: string; caption?: string; class?: string; }
+const { src, alt = '', value = '2026', caption = 'Bengaluru', class: cls = '' } = Astro.props;
+---
+<div class:list={['stamp-shadow', cls]}>
+  <div class="stamp">
+    <div class="stamp__inner">
+      {src ? (
+        <img class="art" src={src} alt={alt} loading="eager" />
+      ) : (
+        <svg class="art" viewBox="0 0 200 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="200" height="240" fill="var(--color-accent)" />
+          <circle cx="132" cy="92" r="34" fill="var(--color-surface)" />
+          <path d="M0 150 C40 118 80 128 120 150 S180 138 200 128 V240 H0Z" fill="var(--color-text)" opacity=".32" />
+          <path d="M0 182 C50 150 100 176 150 170 S190 160 200 166 V240 H0Z" fill="var(--color-text)" opacity=".58" />
+          <path d="M0 212 C60 196 110 216 200 196 V240 H0Z" fill="var(--color-text)" />
+          <path d="M34 206 l9 -26 l9 26z M52 208 l7 -20 l7 20z M150 204 l8 -22 l8 22z" fill="var(--color-text)" />
+        </svg>
+      )}
+      <div class="meta pixel">
+        <span>{caption}</span><span>{value}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  /* paper sits one step darker than a card so the perforation reads on cards and on the page grid */
+  .stamp { background: var(--color-surface-sunken); }
+  .art { width: 100%; aspect-ratio: 5 / 6; object-fit: cover; }
+  .meta { position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-between; padding: var(--space-2) var(--space-3); font-size: var(--step--1); color: var(--color-surface); }
+</style>

@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Stamp from '../components/Stamp.astro';
+import Postmark from '../components/Postmark.astro';
+import NoteRow from '../components/NoteRow.astro';
+import { site, nav } from '../data/site';
+
+const notes = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
+const rooms = nav.filter((n) => n.href !== '/');
+---
+<Base>
+  <section class="wrap hero" aria-labelledby="hero-title">
+    <article class="postcard">
+      <header class="top label muted">
+        <span class="jp" lang="ja">葉書</span><span>Postcard</span>
+        <span class="top__rule" aria-hidden="true"></span>
+        <span>Bengaluru, India</span>
+      </header>
+
+      <div class="message">
+        <h1 id="hero-title" class="display h-hero">Hello from Bengaluru.</h1>
+        <p class="lead">{site.positioning}</p>
+        <p class="muted measure">{site.bio}</p>
+        <p class="sign">
+          <span class="pixel">{site.name}</span>
+          <span class="muted">{site.role}, {site.employer}</span>
+        </p>
+      </div>
+
+      <aside class="address" aria-label="Postmark and address">
+        <div class="stamp-zone" data-stamp-press tabindex="0" role="button" aria-label="Press the stamp">
+          <div class="pm"><Postmark id="pm-hero" /></div>
+          <Stamp class="st" caption="Bengaluru" value="2026" />
+        </div>
+        <ul class="lines">
+          <li><span class="label muted">To</span><span>You, kindly reading</span></li>
+          <li><span class="label muted">From</span><span>{site.name}</span></li>
+          <li><span class="label muted">Does</span><span>Enterprise UX for AI and platforms</span></li>
+          <li><span class="label muted">Also</span><span>Figma Community Lead, Bangalore</span></li>
+        </ul>
+      </aside>
+    </article>
+  </section>
+
+  <section class="wrap block" aria-labelledby="notes-h">
+    <div class="block__head">
+      <h2 id="notes-h" class="display h-section">Latest notes</h2>
+      <a class="all label" href="/notes/" data-sound="tick">All notes</a>
+    </div>
+    <ul class="rows">{notes.map((n) => <NoteRow note={n} />)}</ul>
+  </section>
+
+  <section class="wrap block" aria-labelledby="rooms-h">
+    <h2 id="rooms-h" class="display h-section">Around the site</h2>
+    <ul class="rows">
+      {rooms.map((r) => (
+        <li class="row room">
+          <span class="jp muted" lang="ja">{r.jp}</span>
+          <a class="room__link display" href={r.href} data-sound="tick">{r.label}</a>
+          <span class="muted">{r.blurb}{!r.live && <span class="label"> · soon</span>}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .hero { padding-block: var(--space-6) var(--space-8); }
+  .postcard {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: "top top" "message address";
+    gap: var(--space-6) var(--space-7);
+    padding: var(--space-6) var(--space-7) var(--space-7);
+    background: var(--color-surface); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1);
+    box-shadow: var(--shadow-card);
+  }
+  .top { grid-area: top; display: flex; align-items: center; gap: var(--space-3); }
+  .top__rule { flex: 1; border-top: var(--border) solid var(--color-line); }
+  .message { grid-area: message; display: flex; flex-direction: column; gap: var(--space-5); }
+  .sign { display: grid; gap: 0.15rem; margin-top: auto; padding-top: var(--space-6); }
+  .sign .pixel { font-size: var(--step-1); }
+  .address { grid-area: address; display: grid; align-content: start; gap: var(--space-6); border-left: var(--border) solid var(--color-line); padding-left: var(--space-7); }
+  .stamp-zone { position: relative; display: grid; justify-items: end; padding-top: 4.5rem; cursor: pointer; border-radius: var(--radius-1); }
+  .stamp-zone .st { width: min(52%, 11rem); transform: rotate(2.5deg); }
+  .stamp-zone .pm { position: absolute; width: 86%; left: 0; top: 0; z-index: 2; pointer-events: none; }
+  .lines li { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--space-3); align-items: baseline; padding-block: var(--space-3) var(--space-2); border-bottom: var(--border) solid var(--color-line); }
+
+  .block { padding-bottom: var(--space-8); display: grid; gap: var(--space-5); }
+  .block__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
+  .all { text-underline-offset: 0.3em; }
+  .room { grid-template-columns: 4.5rem minmax(8rem, 14rem) 1fr; align-items: baseline; }
+  .room__link { font-size: var(--step-1); font-weight: 600; text-decoration: none; }
+  .room__link:hover { text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: var(--border); }
+
+  @media (max-width: 52rem) {
+    .postcard { grid-template-columns: 1fr; grid-template-areas: "top" "message" "address"; padding: var(--space-5); gap: var(--space-6); }
+    .address { border-left: 0; padding-left: 0; }
+    .stamp-zone .st { width: min(46%, 9rem); }
+    .room { grid-template-columns: 3rem 1fr; } .room > :last-child { grid-column: 2; }
+  }
+</style>

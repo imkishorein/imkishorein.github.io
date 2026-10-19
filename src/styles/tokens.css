@@ -1,0 +1,114 @@
+/*
+  DESIGN TOKENS: the single global declaration for the whole site.
+
+  Three layers, in order:
+    1. PALETTE   raw brand values. Change these 3 to re-colour the site.
+    2. ROLES     what colour/type/space MEANS (bg, text, accent, display font...).
+                 Components use roles only, never palette values or font names.
+    3. SCALES    type, space, shape, motion, sound.
+
+  Rules (enforced by `npm run check:tokens`):
+    - No hex/rgb colours outside this file.
+    - No font-family names outside fonts.css and this file.
+*/
+
+:root {
+  color-scheme: light dark;
+
+  /* ───────── 1. PALETTE (raw) ───────── */
+  --palette-paper: #e8e9df; /* Soft White  */
+  --palette-sage:  #a9b887; /* Sage Green  */
+  --palette-olive: #2e3d28; /* Deep Olive  */
+
+  /* ───────── 2. COLOUR ROLES ─────────
+     light-dark(light value, dark value). Dark mode is derived from the
+     same palette, so swapping palette values re-themes both modes. */
+  --color-bg:            light-dark(var(--palette-paper), color-mix(in oklab, var(--palette-olive) 82%, black));
+  --color-surface:       light-dark(color-mix(in oklab, var(--palette-paper) 55%, white), var(--palette-olive));
+  --color-surface-sunken:light-dark(color-mix(in oklab, var(--palette-paper) 86%, var(--palette-sage)), color-mix(in oklab, var(--palette-olive) 70%, black));
+  --color-text:          light-dark(var(--palette-olive), var(--palette-paper));
+  --color-text-muted:    light-dark(color-mix(in oklab, var(--palette-olive) 80%, var(--palette-paper)), color-mix(in oklab, var(--palette-paper) 76%, var(--palette-olive)));
+  --color-accent:        var(--palette-sage);                 /* fills, marks, highlights */
+  --color-accent-ink:    light-dark(color-mix(in oklab, var(--palette-sage) 38%, var(--palette-olive)), var(--palette-sage)); /* accent used as text */
+  --color-on-accent:     var(--palette-olive);
+  --color-strong:        light-dark(var(--palette-olive), var(--palette-paper));  /* solid seal / button fill */
+  --color-on-strong:     light-dark(var(--palette-paper), var(--palette-olive));
+  --color-line:          light-dark(color-mix(in oklab, var(--palette-olive) 34%, transparent), color-mix(in oklab, var(--palette-paper) 30%, transparent));
+  --color-line-strong:   light-dark(color-mix(in oklab, var(--palette-olive) 80%, transparent), color-mix(in oklab, var(--palette-paper) 80%, transparent));
+  --color-grid:          light-dark(color-mix(in oklab, var(--palette-olive) 8%, transparent), color-mix(in oklab, var(--palette-paper) 6%, transparent));
+  --color-ink-faded:     light-dark(color-mix(in oklab, var(--palette-olive) 66%, transparent), color-mix(in oklab, var(--palette-paper) 66%, transparent)); /* postmarks */
+  --color-focus:         light-dark(var(--palette-olive), var(--palette-sage));
+  --color-selection:     color-mix(in oklab, var(--palette-sage) 70%, transparent);
+  --color-shadow:        light-dark(color-mix(in oklab, var(--palette-olive) 45%, transparent), color-mix(in oklab, black 55%, transparent));
+
+  /* ───────── 2. FONT ROLES ─────────
+     Family names come from fonts.css. */
+  --font-sans:    "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono:    "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-accent:  "Geist Pixel", var(--font-mono);   /* stamps, postmarks, tiny labels */
+  --font-jp:      "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", "Noto Sans CJK JP", "Meiryo", sans-serif;
+
+  --weight-body:    400;
+  --weight-medium:  500;
+  --weight-display: 700;
+
+  --leading-tight: 1.04;
+  --leading-snug:  1.25;
+  --leading-body:  1.62;
+  --tracking-display: -0.035em;
+  --tracking-label:   0.16em;
+  --tracking-mono:    0;
+
+  /* ───────── 3. TYPE SCALE (fluid) ───────── */
+  --step--2: clamp(0.68rem, 0.66rem + 0.1vw, 0.74rem);
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.86rem);
+  --step-0:  clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --step-1:  clamp(1.15rem, 1.08rem + 0.35vw, 1.34rem);
+  --step-2:  clamp(1.4rem, 1.25rem + 0.75vw, 1.85rem);
+  --step-3:  clamp(1.85rem, 1.5rem + 1.75vw, 2.9rem);
+  --step-4:  clamp(2.3rem, 1.6rem + 3.4vw, 4.4rem);
+  --step-5:  clamp(2.9rem, 1.5rem + 6.4vw, 7rem);
+
+  /* ───────── 3. SPACE / LAYOUT ───────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+
+  --page-max: 72rem;
+  --measure:  62ch;
+  --gutter:   clamp(1rem, 4vw, 2.5rem);
+  --grid-size: 4rem;           /* background grid cell */
+
+  /* ───────── 3. SHAPE ───────── */
+  --radius-1: 2px;
+  --radius-2: 6px;
+  --border:   1px;
+
+  /* stamp perforation */
+  --perf-radius: 4px;
+  --perf-pitch:  16px;
+
+  --shadow-card: 0 1px 0 var(--color-line), 0 26px 36px -28px var(--color-shadow);
+  --shadow-stamp: 0 10px 14px -8px var(--color-shadow);
+
+  /* ───────── 3. MOTION ───────── */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-press: cubic-bezier(0.5, 0, 0.2, 1.4);
+  --dur-fast: 140ms;
+  --dur-med:  280ms;
+  --dur-slow: 700ms;
+
+  /* ───────── 3. SOUND (read by scripts/site.ts) ───────── */
+  --sound-volume: 0.1; /* 0 to 1, kept low on purpose */
+}
+
+/* Explicit theme override (set by the theme toggle). */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }

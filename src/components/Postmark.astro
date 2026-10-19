@@ -1,0 +1,20 @@
+---
+// Circular cancellation postmark with wavy lines. Pure SVG, colour from tokens.
+interface Props { id?: string; top?: string; date?: string; year?: string; class?: string; }
+const { id = 'pm', top = 'BENGALURU · INDIA · BENGALURU · INDIA ·', date = '19 OCT', year = '2026', class: cls = '' } = Astro.props;
+const waves = [32, 48, 64, 80, 96];
+---
+<svg class:list={['postmark', cls]} viewBox="0 0 260 120" role="img" aria-label={`Postmark, Bengaluru, ${date} ${year}`} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+  {waves.map((y) => <path d={`M2 ${y} q 10 -9 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 15 0`} />)}
+  <circle cx="190" cy="60" r="52" />
+  <circle cx="190" cy="60" r="35" stroke-width="1.2" />
+  <path id={id} d="M 190,60 m -43,0 a 43,43 0 1,1 86,0 a 43,43 0 1,1 -86,0" stroke="none" />
+  <text fill="currentColor" stroke="none" font-size="8.6" letter-spacing="1.2" style="font-family: var(--font-accent)">
+    <textPath href={`#${id}`} textLength="262" lengthAdjust="spacing">{top}</textPath>
+  </text>
+  <text x="190" y="58" text-anchor="middle" fill="currentColor" stroke="none" font-size="15" style="font-family: var(--font-accent)">{date}</text>
+  <text x="190" y="74" text-anchor="middle" fill="currentColor" stroke="none" font-size="11" letter-spacing="2" style="font-family: var(--font-accent)">{year}</text>
+</svg>
+<style>
+  .postmark { color: var(--color-ink-faded); width: 100%; height: auto; overflow: visible; transform-origin: 73% 50%; }
+</style>

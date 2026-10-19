@@ -1,0 +1,29 @@
+/*
+  FONT FACES: the ONLY file that names font files.
+  To swap a typeface: change the @font-face below (family name + file),
+  then point the matching role in tokens.css (--font-sans, --font-mono, --font-accent).
+  Nothing else in the project mentions a font name.
+
+  Interim set (Vercel Geist, SIL OFL). Final direction is still undecided.
+*/
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Pixel";
+  src: url("/fonts/GeistPixel-Square.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

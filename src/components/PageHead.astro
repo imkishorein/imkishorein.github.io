@@ -1,0 +1,9 @@
+---
+interface Props { jp: string; kicker: string; title: string; intro?: string; }
+const { jp, kicker, title, intro } = Astro.props;
+---
+<section class="wrap page-head">
+  <p class="kicker label"><span class="jp" lang="ja">{jp}</span><span>{kicker}</span></p>
+  <h1 class="display h-page">{title}</h1>
+  {intro && <p class="lead measure muted">{intro}</p>}
+</section>

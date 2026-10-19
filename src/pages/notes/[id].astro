@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  return all.map((note, i) => ({ params: { id: note.id }, props: { note, newer: all[i - 1], older: all[i + 1] } }));
+}
+const { note, newer, older } = Astro.props;
+const { Content } = await render(note);
+const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<Base title={note.data.title} description={note.data.summary}>
+  <article class="wrap note">
+    <header class="head">
+      <p class="label muted"><a href="/notes/" data-sound="tick">Notes</a> · {note.data.category} · <time datetime={note.data.date.toISOString()}>{date}</time>{note.data.placeholder && ' · placeholder'}</p>
+      <h1 class="display h-page">{note.data.title}</h1>
+      <p class="lead muted">{note.data.summary}</p>
+    </header>
+    <div class="prose measure"><Content /></div>
+    <nav class="pager" aria-label="More notes">
+      {newer ? <a href={`/notes/${newer.id}/`} data-sound="tick"><span class="label muted">Newer</span><span>{newer.data.title}</span></a> : <span />}
+      {older ? <a href={`/notes/${older.id}/`} data-sound="tick" class="r"><span class="label muted">Older</span><span>{older.data.title}</span></a> : <span />}
+    </nav>
+  </article>
+</Base>
+<style>
+  .note { padding-block: var(--space-8) var(--space-8); display: grid; gap: var(--space-7); }
+  .head { display: grid; gap: var(--space-4); max-width: 46rem; }
+  .head a { text-underline-offset: 0.25em; }
+  .pager { display: flex; justify-content: space-between; gap: var(--space-5); border-top: var(--border) solid var(--color-line-strong); padding-top: var(--space-5); }
+  .pager a { display: grid; gap: var(--space-1); text-decoration: none; max-width: 22rem; }
+  .pager a:hover span:last-child { text-decoration: underline; text-underline-offset: 0.2em; }
+  .r { text-align: right; margin-left: auto; }
+</style>

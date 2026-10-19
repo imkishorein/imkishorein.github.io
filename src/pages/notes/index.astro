@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import NoteRow from '../../components/NoteRow.astro';
+
+const notes = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base title="Notes" description="Short notes on things I tried or learned: AI, design, work and photography.">
+  <PageHead jp="メモ" kicker="Notes" title="Short notes, written fast." intro="Things I tried, learned or noticed. Not essays." />
+  <section class="wrap" style="padding-bottom: var(--space-8)">
+    {notes.length ? <ul class="rows">{notes.map((n) => <NoteRow note={n} />)}</ul> : <p class="muted">Nothing here yet. Add a markdown file to src/content/notes.</p>}
+  </section>
+</Base>
