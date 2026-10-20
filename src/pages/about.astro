@@ -1,8 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
-import Stamp from '../components/Stamp.astro';
 import DateStamp from '../components/DateStamp.astro';
+import CompanyMarks from '../components/CompanyMarks.astro';
 import { site, timeline, community, howIWork } from '../data/site';
 // "2022 to 2025" becomes a stamp reading 2022, a short line, then 2025. A single year just shows the year.
 const stampOf = (when: string) => { const [from, to] = when.split(' to '); return { main: from, to: to ? (to === 'now' ? 'NOW' : to) : '' }; };
@@ -16,7 +16,7 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
       <p>Before design was the job, I built things. I co-founded a startup during engineering college and bootstrapped it into a revenue-generating company, then moved through UI development into product design. That mix is why I am comfortable both drawing the screen and talking to the engineer who ships it.</p>
       <p>Outside work I lead the Friends of Figma Bangalore community, mentoring designers and hosting events that connect the design ecosystem.</p>
     </div>
-    <Stamp class="portrait" src="/kishore-avatar.png" alt="Illustrated portrait of Kishore" />
+    <img class="portrait" src="/kishore-portrait.webp" width="756" height="760" alt="Illustrated portrait of Kishore: dark hair, round glasses and a patterned shirt, in front of a sage brush-stroke circle" />
   </section>
 
   <section class="wrap block">
@@ -25,6 +25,7 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
       {timeline.map((t) => (
         <li class="row t">
           <DateStamp {...stampOf(t.when)} wide />
+          <CompanyMarks name={t.org} />
           <div><p class="display role">{t.role}</p><p class="muted">{t.org}</p></div>
           <p class="body">{t.body}</p>
         </li>
@@ -36,7 +37,7 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
     <h2 class="display h-section">Community</h2>
     <ul class="rows">
       {community.map((c) => (
-        <li class="row t">
+        <li class="row t t3">
           <DateStamp {...stampOf(c.when)} wide />
           <div><p class="display role">{c.role}</p><p class="muted">{c.org}</p></div>
           <span />
@@ -52,11 +53,14 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
   </section>
 </Base>
 <style>
-  .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(9rem, 13rem); gap: var(--space-8); align-items: start; padding-bottom: var(--space-8); }
-  .portrait { transform: rotate(3deg); position: sticky; top: var(--space-6); }
+  .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-7); align-items: center; padding-bottom: var(--space-8); }
+  .intro .measure { max-width: none; } /* the text column is set by the grid so the portrait can mirror it */
+  .portrait { width: 100%; height: auto; }
   .block { display: grid; gap: var(--space-5); padding-bottom: var(--space-8); }
-  .t { grid-template-columns: 9.5rem minmax(0, 20rem) 1fr; align-items: start; }
+  .t { grid-template-columns: 9.5rem 8rem minmax(0, 16rem) 1fr; align-items: start; }
+  .t3 { grid-template-columns: 9.5rem minmax(0, 20rem) 1fr; }
+  .t :global(.mark) { align-self: center; }
   .role { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; line-height: var(--leading-snug); }
   .body { text-wrap: pretty; }
-  @media (max-width: 52rem) { .intro { grid-template-columns: 1fr; } .portrait { position: static; max-width: 9rem; } .t { grid-template-columns: 1fr; } }
+  @media (max-width: 52rem) { .intro { grid-template-columns: 1fr; } .portrait { position: static; max-width: 22rem; } .t, .t3 { grid-template-columns: 1fr; } .t :global(.mark) { width: 6rem; } }
 </style>

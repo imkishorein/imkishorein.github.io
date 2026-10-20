@@ -6,6 +6,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
 ---
 <header class="wrap bar">
   <a class="mark" href="/" data-sound="tick" aria-label={`${site.name}, home`}>
+    <img class="mark__img" src="/kishore-logo.png" width="40" height="40" alt="" />
     <span class="mark__name">{site.name}</span>
   </a>
   <nav aria-label="Main">
@@ -23,10 +24,14 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
   <Controls />
 </header>
 <style>
-  .bar { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-4) var(--space-6); padding-block: var(--space-5) var(--space-3); }
-  nav { margin-right: 7.2rem; } /* leave room for the two hanging icons at the right edge */
+  .bar { position: relative; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-4) var(--space-6); padding-block: var(--space-5) var(--space-3); }
+  nav { margin-right: 7.2rem; margin-top: 0.3rem; } /* nudges the link text onto the logo's centre line */ /* leave room for the two hanging icons at the right edge */
   @media (max-width: 52rem) { nav { margin-right: 0; } } /* when the nav wraps below the logo it sits under the icons, so it can use the full width */
-  .mark { text-decoration: none; font-weight: 600; letter-spacing: -0.02em; font-size: var(--step-0); }
+  .mark { display: inline-flex; align-items: center; gap: var(--space-3); text-decoration: none; font-weight: 600; letter-spacing: -0.02em; font-size: var(--step-0); }
+  /* the avatar is the site's logo: a round, hand-drawn portrait that tilts a little when you point at it */
+  .mark__img { width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none; box-shadow: 0 0 0 1.5px var(--color-line-strong); transition: transform var(--dur-med) var(--ease-press); }
+  .mark:hover .mark__img, .mark:focus-visible .mark__img { transform: rotate(-6deg) scale(1.06); }
+  @media (prefers-reduced-motion: reduce) { .mark__img { transition: none; } .mark:hover .mark__img, .mark:focus-visible .mark__img { transform: none; } }
   ul { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); }
   .link { position: relative; display: inline-block; padding-block: var(--space-1) var(--space-5); text-decoration: none; color: var(--color-text-muted); transition: color var(--dur-fast); }
   .link:hover, .link:focus-visible, .link.current { color: var(--color-text); }

@@ -94,10 +94,6 @@ It is a home for a few things:
 
 Some of these are still empty. Work, Community and Photography are marked coming soon, and I would rather say so than fill them with fake content.
 
-## What I borrowed and what is mine
-
-I looked at hvpandya.com for how notes and a Stuff page can feel, and at charmiekapoor.com for a personal site with real personality. Both showed me that a portfolio can have a point of view. The postcard, the stamps, the lantern and the postbox are my own take on that.
-
 ## Still undecided
 
 Honesty is part of the idea too, so here is what is not settled:
