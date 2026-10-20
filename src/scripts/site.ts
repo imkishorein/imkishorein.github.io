@@ -132,7 +132,7 @@ function play(kind: Sound, hover = false) {
     f.frequency.setValueAtTime(700 * j, t); f.frequency.exponentialRampToValueAtTime(3200 * j, t + 0.6);
     env(g, v * 0.5, 0.7, 0.18);
     n.connect(f).connect(g).connect(bus);
-  } else if (kind === 'pad') { // a soft pat on an ink pad as the stamp is picked up: hover on the hero
+  } else if (kind === 'pad') { // a soft pat on an ink pad as the stamp is picked up: hover on a reaction tile
     const o = c.createOscillator(), g = c.createGain(); o.type = 'sine';
     o.frequency.setValueAtTime(330 * j, t); o.frequency.exponentialRampToValueAtTime(190 * j, t + 0.09);
     env(g, v * 0.7, 0.11, 0.004);
@@ -340,7 +340,7 @@ if (hero && canHover.matches) {
     if (!reduceMotion()) art.animate([{ transform: 'rotate(6deg)' }, { transform: 'rotate(-10deg) translateY(-3px)' }, { transform: 'rotate(12deg)' }, { transform: 'rotate(-6deg) translateY(-2px)' }, { transform: 'rotate(6deg)' }], { duration: 700, easing: 'ease-in-out' });
   };
   const hideHint = () => { clearTimeout(hintTimer); hint.classList.remove('show'); };
-  const show = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; shown = true; hero.classList.add('has-stamp-cursor'); move(e); cur.classList.add('on'); play('pad', true); if (!stamped) { clearTimeout(hintTimer); hintTimer = window.setTimeout(showHint, 700); } };
+  const show = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; shown = true; hero.classList.add('has-stamp-cursor'); move(e); cur.classList.add('on'); if (!stamped) { clearTimeout(hintTimer); hintTimer = window.setTimeout(showHint, 700); } };
   const hide = () => { shown = false; hero.classList.remove('has-stamp-cursor'); cur.classList.remove('on'); hideHint(); };
   hero.addEventListener('pointerenter', show);
   hero.addEventListener('pointermove', (e) => { if (!shown) show(e); else move(e); });

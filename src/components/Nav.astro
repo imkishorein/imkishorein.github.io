@@ -1,13 +1,14 @@
 ---
-import { nav, site } from '../data/site';
+import { nav } from '../data/site';
 import Controls from './Controls.astro';
+import Wordmark from './Wordmark.astro';
 const path = Astro.url.pathname;
 const isCurrent = (href: string) => path === href || path.startsWith(href);
 ---
 <header class="wrap bar">
-  <a class="mark" href="/" data-sound="tick" aria-label={`${site.name}, home`}>
-    <img class="mark__img" src="/kishore-logo.png" width="40" height="40" alt="" />
-    <span class="mark__name">{site.name}</span>
+  <a class="mark" href="/" data-sound="tick" aria-label="imkishore.in, home">
+    <img class="mark__img" src="/kishore-logo.png" width="44" height="44" alt="" />
+    <Wordmark />
   </a>
   <nav aria-label="Main">
     <ul>
@@ -28,8 +29,8 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
   nav { margin-right: 7.2rem; margin-top: 0.3rem; } /* nudges the link text onto the logo's centre line */ /* leave room for the two hanging icons at the right edge */
   @media (max-width: 52rem) { nav { margin-right: 0; } } /* when the nav wraps below the logo it sits under the icons, so it can use the full width */
   .mark { display: inline-flex; align-items: center; gap: var(--space-3); text-decoration: none; font-weight: 600; letter-spacing: -0.02em; font-size: var(--step-0); }
-  /* the avatar is the site's logo: a round, hand-drawn portrait that tilts a little when you point at it */
-  .mark__img { width: 2.5rem; height: 2.5rem; border-radius: 50%; flex: none; box-shadow: 0 0 0 1.5px var(--color-line-strong); transition: transform var(--dur-med) var(--ease-press); }
+  /* the logo is a round, rubber-stamp style portrait with its own ring that tilts a little when you point at it */
+  .mark__img { width: 2.75rem; height: 2.75rem; border-radius: 50%; flex: none; transition: transform var(--dur-med) var(--ease-press); }
   .mark:hover .mark__img, .mark:focus-visible .mark__img { transform: rotate(-6deg) scale(1.06); }
   @media (prefers-reduced-motion: reduce) { .mark__img { transition: none; } .mark:hover .mark__img, .mark:focus-visible .mark__img { transform: none; } }
   ul { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); }

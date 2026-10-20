@@ -20,6 +20,7 @@
 - [ ] Hero: Japanese label 航空便 (airmail) not checked by a native reader. Weather comes from Open-Meteo at city-centre coordinates (12.97, 77.59): confirm you are happy with a third-party request.
 
 ## Decisions still open
+- [ ] Header wordmark: which of the six styles to keep (Marker, Brush, Neon, Stitched, Playful, Typed), or keep the random mix. Check them at phone width and in dark mode (only checked on desktop in light mode). Typed looks smaller than the others at the same header height.
 - [ ] Reaction totals shared between visitors. Today reactions are per browser only. Needs a small backend (Cloudflare Pages Function with free KV storage); the cap would then be per visitor.
 - [ ] Reaction meanings (Love it, Learned something, Agree, Sparked an idea) and the crane and seal icons were not confirmed as final; the crane is the weakest drawing.
 - [ ] Final font pairing. Interim is Geist. Second font was dictated as "Monopixel": Geist Pixel vs Geist Mono was never explicitly confirmed. Revisit with a specimen page against other sans + mono pairings.

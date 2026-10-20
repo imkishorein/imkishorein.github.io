@@ -1,0 +1,215 @@
+---
+// The site's wordmark: "imkishore.in", lettered by hand in six different styles. One is picked at random on every page load
+// (never the same one twice in a row, remembered in sessionStorage `imk:wordmark`). The letters themselves are shared; each
+// style changes the pen, the colour and the animation:
+//   1 Marker    thin monoline, writes itself, leaf dot, sparkle, wavy underline. Hover: letters hop in a wave.
+//   2 Brush     fat strokes on a highlighter swipe, letters drop in and bounce. Hover: letters squash and stretch.
+//   3 Neon      sage letters inside an olive outline, outline draws then the colour flicks on, stars twinkle. Hover: blink.
+//   4 Stitched  dotted thread letters sewn in by a needle that crosses the page. Hover: the stitches march.
+//   5 Playful   letters slide in from above and below, then bob for ever, confetti around. Hover: they bob faster.
+//   6 Typed     pixel type that types itself with a blinking block cursor. Hover: letters glitch.
+// Ink is currentColor, accents are --color-accent / --color-accent-ink, so every style follows light and dark mode.
+// Without JavaScript the Marker shows. With reduced motion the chosen style is shown still.
+// Letters: baseline y=50, x-height top y=26, ascender top y=6. The last two letters sit 3 units to the right of the others.
+const letters: string[][] = [
+  ['M10 27 C10.5 33 9.5 42 10 50'],                                                                                    // i
+  ['M24 28 C23.5 35 24.5 43 24 50', 'M24 38 C24 28 37 26 37.5 37 C37.5 42 37 46 37.5 50', 'M37.5 38 C38 28 51 26 51.5 37 C51.5 42 51 46 51.5 50'], // m
+  ['M64 6 C63.5 20 64.5 38 64 50', 'M80 27 C75 32 70 36 65 40 C71 41 77 45 82 50'],                                    // k
+  ['M92 27 C92.5 34 91.5 43 92 50'],                                                                                   // i
+  ['M117 31 C113 25 102 26 103 33 C104 40 118 38 117 45 C116 52 104 52 100 46'],                                       // s
+  ['M125 6 C124.5 20 125.5 38 125 50', 'M125 38 C126 27 139 25 139.5 36 C139.5 42 139 46 139.5 50'],                   // h
+  ['M156 26 C148 25 145 36 148 44 C151 52 162 51 164 42 C166 33 162 26 155 27'],                                       // o
+  ['M174 27 C174.5 34 173.5 43 174 50', 'M174 38 C175 30 181 26 188 28'],                                              // r
+  ['M194 39 C200 40 208 40 210 36 C211 28 202 24 196 29 C190 34 191 46 197 49 C202 52 208 50 211 46'],                 // e
+  [],                                                                                                                  // . (a dot, below)
+  ['M232 27 C232.5 34 231.5 43 232 50'],                                                                               // i
+  ['M245 27 C244.5 34 245.5 43 245 50', 'M245 38 C246 27 259 25 259.5 36 C259.5 42 259 46 259.5 50'],                  // n
+];
+// dots: letter index, centre (the full stop is index 9)
+const dots: Record<number, [number, number]> = { 0: [10.5, 14], 3: [92.5, 14], 9: [225, 49], 10: [235.5, 14] };
+// per style: pen width, whether strokes write on (pathLength), and the layers drawn (Neon draws the letters twice)
+const styles = [
+  { n: 1, sw: 5,   draw: true,  layers: [{ cls: '', dot: 3.1 }] },
+  { n: 2, sw: 7,   draw: false, layers: [{ cls: '', dot: 4 }] },
+  { n: 3, sw: 10,  draw: true,  layers: [{ cls: 'outer', dot: 5.2 }, { cls: 'inner', dot: 2.6 }] },
+  { n: 4, sw: 3.8, draw: false, layers: [{ cls: '', dot: 3 }] },
+  { n: 5, sw: 4.5, draw: false, layers: [{ cls: '', dot: 3.2 }] },
+];
+const typed = [...'imkishore.in'];
+const star = 'M0 -9 C0 -3 2 -1 8 0 C2 1 0 3 0 9 C0 3 -2 1 -8 0 C-2 -1 0 -3 0 -9 Z';
+---
+<span class="wms" data-v="1" role="img" aria-label="imkishore.in">
+  {styles.map((S) => (
+    <svg class={`v v${S.n}`} viewBox="-4 -4 294 68" aria-hidden="true" fill="none" stroke="currentColor" stroke-width={S.sw} stroke-linecap="round" stroke-linejoin="round">
+      {S.n === 2 && <path class="blob" d="M58 21 C100 13 180 15 216 19 C222 30 220 45 213 56 C170 62 100 59 60 55 C54 44 54 31 58 21 Z" fill="var(--color-accent)" stroke="none" opacity="0.55" />}
+      {S.n === 4 && <defs><clipPath id="wm-reveal"><rect id="wm-rev" x="-10" y="-10" width="320" height="90" /></clipPath></defs>}
+      <g clip-path={S.n === 4 ? 'url(#wm-reveal)' : undefined}>
+        {S.layers.map((L) => (
+          <g class={L.cls}>
+            {letters.map((strokes, i) => (
+              <g transform={i > 9 ? 'translate(3 0)' : undefined}>
+                <g class="ch" style={`--i:${i};--s:${i % 2 ? 1 : -1}`}>
+                  <g class="pp">
+                    {strokes.map((d) => <path class={S.draw ? 'draw' : 'st'} d={d} pathLength={S.draw ? 1 : undefined} />)}
+                    {dots[i] && !(S.n === 1 && i === 0) && <circle class={`pop dot${i === 9 ? ' stop' : ''}`} cx={dots[i][0]} cy={dots[i][1]} r={i === 9 ? L.dot * 1.15 : L.dot} style={`--pd:${0.2 + i * 0.085}s`} />}
+                  </g>
+                </g>
+              </g>
+            ))}
+          </g>
+        ))}
+      </g>
+
+      {S.n === 1 && (
+        <g class="doodle" stroke="var(--color-accent-ink)">
+          <g class="ch" style="--i:0"><path class="pop leaf" d="M10 19 C4 14 7 6 16 4.5 C17.5 11 15 17 10 19 Z M10 19 L14.5 9" stroke-width="2.2" style="--pd:0.25s" /></g>
+          <path class="draw" d="M64 58 C72 54 78 61 88 57 S104 55 114 58 S132 61 142 57 S160 55 170 58 S190 60 214 56" pathLength="1" stroke-width="2.4" style="--wd:1.15s" />
+          <g class="spin"><path class="pop spark" d="M277 -2 C277 4 279 6 285 7 C279 8 277 10 277 16 C277 10 275 8 269 7 C275 6 277 4 277 -2 Z" fill="var(--color-accent-ink)" stroke-width="1" style="--pd:1.5s" /></g>
+        </g>
+      )}
+      {S.n === 2 && (
+        <g class="doodle" stroke="var(--color-accent-ink)" stroke-width="2.6">
+          <g class="spin"><path class="pop" d="M278 2 V16 M271 5.5 L285 12.5 M285 5.5 L271 12.5" style="--pd:1s" /></g>
+          <path class="pop" d="M228 8 l2 4 l4 2 l-4 2 l-2 4 l-2 -4 l-4 -2 l4 -2 Z" fill="var(--color-accent-ink)" stroke-width="1" style="--pd:1.15s" />
+        </g>
+      )}
+      {S.n === 3 && (
+        <g class="doodle" fill="var(--color-accent-ink)" stroke="none">
+          <g transform="translate(278 8)"><path class="pop twinkle" d={star} style="--pd:1.7s;--td:0s" /></g>
+          <g transform="translate(150 -1) scale(0.6)"><path class="pop twinkle" d={star} style="--pd:1.85s;--td:0.7s" /></g>
+          <g transform="translate(228 -1) scale(0.5)"><path class="pop twinkle" d={star} style="--pd:2s;--td:1.3s" /></g>
+          <g transform="translate(-2 4) scale(0.55)"><path class="pop twinkle" d={star} style="--pd:2.1s;--td:0.4s" /></g>
+        </g>
+      )}
+      {S.n === 4 && (
+        <g class="needle" stroke="var(--color-accent-ink)" stroke-width="2.2">
+          <path d="M0 0 L-19 9" />
+          <circle cx="-19.5" cy="9.3" r="1.8" />
+          <path d="M-21 11 C-25 19 -31 12 -37 18" stroke-width="1.6" stroke-dasharray="3 3" />
+        </g>
+      )}
+      {S.n === 5 && (
+        <g class="doodle">
+          <circle class="pop" cx="272" cy="6" r="3" fill="var(--color-accent-ink)" stroke="none" style="--pd:1s" />
+          <circle class="pop" cx="284" cy="20" r="2" fill="var(--color-accent)" stroke="none" style="--pd:1.1s" />
+          <path class="pop" d="M262 -2 l4 7 l-8 0 Z" fill="var(--color-accent)" stroke="none" style="--pd:1.2s" />
+          <path class="pop" d="M2 6 C-4 8 -2 16 4 14 C8 12 6 8 3 9" stroke="var(--color-accent-ink)" stroke-width="2" style="--pd:1.3s" />
+          <circle class="pop" cx="222" cy="8" r="2.4" stroke="var(--color-accent-ink)" stroke-width="1.8" style="--pd:1.4s" />
+        </g>
+      )}
+    </svg>
+  ))}
+  <span class="v v6" aria-hidden="true">{typed.map((c, i) => <span class={`c${c === '.' ? ' stop' : ''}`} style={`--i:${i}`}>{c}</span>)}<span class="caret"></span></span>
+</span>
+<script is:inline>
+  // Runs right after the markup, before first paint: picks a style (never the same as last time) and starts its entrance.
+  (function () {
+    var w = document.currentScript.previousElementSibling;
+    var last = 0;
+    try { last = Number(sessionStorage.getItem('imk:wordmark')) || 0; } catch (e) { /* private mode */ }
+    var n;
+    do { n = 1 + Math.floor(Math.random() * 6); } while (n === last);
+    try { sessionStorage.setItem('imk:wordmark', String(n)); } catch (e) { /* private mode */ }
+    w.setAttribute('data-v', String(n));
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    w.setAttribute('data-draw', '');
+    // start on the next frame so a busy first paint cannot eat the first letters
+    requestAnimationFrame(function () { w.classList.add('in'); });
+    // once the entrance is over, drop the hidden start states so hover and bob animations cannot leave a letter invisible
+    setTimeout(function () { w.removeAttribute('data-draw'); w.classList.remove('in'); }, 3200);
+  })();
+</script>
+<style>
+  .wms { display: flex; align-items: center; height: 2.75rem; color: var(--color-text); }
+  .v { display: none; height: 100%; width: auto; overflow: visible; }
+  .wms[data-v="1"] .v1, .wms[data-v="2"] .v2, .wms[data-v="3"] .v3, .wms[data-v="4"] .v4, .wms[data-v="5"] .v5 { display: block; }
+  .wms[data-v="6"] .v6 { display: inline-flex; }
+  @media (max-width: 40rem) { .wms { height: 2.3rem; } }
+
+  .ch, .pp, .spin, .pop, .blob { transform-box: fill-box; transform-origin: 50% 50%; }
+  .ch { transform-origin: 50% 100%; }
+  .dot { fill: currentColor; stroke: none; }
+  .stop { fill: var(--color-accent-ink); }
+  .draw { stroke-dasharray: 1; }
+
+  /* ---------- 1 Marker: letters write one after another, doodles pop in ---------- */
+  .wms[data-draw] .v1 .draw, .wms[data-draw] .v3 .draw { stroke-dashoffset: 1; }
+  .wms[data-draw] .pop { transform: scale(0); }
+  .wms[data-draw].in .v1 .pp > .draw { animation: wm-draw 340ms cubic-bezier(0.45, 0.05, 0.35, 1) calc(var(--i) * 85ms) forwards; }
+  .wms[data-draw].in .v1 .doodle > .draw { animation: wm-draw 600ms cubic-bezier(0.45, 0.05, 0.35, 1) var(--wd) forwards; }
+  .wms[data-draw].in .pop { animation: wm-pop 460ms var(--ease-press) var(--pd) forwards; }
+  @keyframes wm-draw { to { stroke-dashoffset: 0; } }
+  @keyframes wm-pop { to { transform: scale(1); } }
+
+  /* ---------- 2 Brush: highlighter swipes in, letters drop and bounce ---------- */
+  .v2 .blob { transform-origin: 0 50%; }
+  .wms[data-draw] .v2 .blob { transform: scaleX(0); }
+  .wms[data-draw] .v2 .pp { opacity: 0; transform: translateY(-18px); }
+  .wms[data-draw].in .v2 .blob { animation: wm-wipe 520ms var(--ease-out) forwards; }
+  .wms[data-draw].in .v2 .pp { animation: wm-drop 560ms var(--ease-press) calc(260ms + var(--i) * 70ms) forwards; }
+  @keyframes wm-wipe { to { transform: scaleX(1); } }
+  @keyframes wm-drop { to { opacity: 1; transform: none; } }
+
+  /* ---------- 3 Neon: olive outline draws, sage colour flicks on, stars twinkle ---------- */
+  .v3 .inner { stroke: var(--color-accent); stroke-width: 5; }
+  .v3 .inner .dot { fill: var(--color-accent); }
+  .v3 .outer .stop { fill: currentColor; }
+  .wms[data-draw] .v3 .inner { opacity: 0; }
+  .wms[data-draw].in .v3 .outer .pp > .draw { animation: wm-draw 340ms cubic-bezier(0.45, 0.05, 0.35, 1) calc(var(--i) * 85ms) forwards; }
+  .wms[data-draw].in .v3 .inner { animation: wm-flick 900ms steps(1) 1.25s forwards; }
+  @keyframes wm-flick { 0% { opacity: 0; } 12% { opacity: 1; } 22% { opacity: 0.15; } 34% { opacity: 1; } 46% { opacity: 0.3; } 60%, 100% { opacity: 1; } }
+
+  /* ---------- 4 Stitched: a needle sews the thread letters from left to right ---------- */
+  .v4 .st { stroke-dasharray: 7 4.5; }
+  .v4 .stop, .v4 .dot { stroke: none; }
+  .v4 .needle { transform: translate(286px, 8px); }
+  .wms[data-draw] .v4 #wm-rev { width: 0; }
+  .wms[data-draw].in .v4 #wm-rev { animation: wm-sew 1.5s steps(30) 0.1s forwards; }
+  .wms[data-draw].in .v4 .needle { animation: wm-needle 1.5s steps(30) 0.1s both; }
+  .wms[data-draw] .v4 .pop { transform: none; animation: none; }
+  @keyframes wm-sew { to { width: 320px; } }
+  @keyframes wm-needle { from { transform: translate(4px, 8px); } to { transform: translate(286px, 8px); } }
+
+  /* ---------- 5 Playful: letters slide in from above and below, then bob ---------- */
+  .v5 .ch:nth-child(odd) { color: var(--color-accent-ink); }
+  .wms[data-draw] .v5 .pp { opacity: 0; transform: translateY(calc(var(--s) * 16px)); }
+  .wms[data-draw].in .v5 .pp { animation: wm-slide 520ms var(--ease-press) calc(var(--i) * 70ms) forwards; }
+  @keyframes wm-slide { to { opacity: 1; transform: none; } }
+
+  /* ---------- 6 Typed: pixel type, typed in one letter at a time, block cursor ---------- */
+  .v6 { align-items: center; font-family: var(--font-accent); font-size: 1.9rem; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
+  .v6 .c { display: inline-block; }
+  .v6 .caret { display: inline-block; width: 0.55em; height: 0.95em; margin-left: 0.12em; background: var(--color-accent-ink); }
+  /* a letter takes no room until it is typed, so the cursor always sits right after the last letter */
+  .wms[data-draw] .v6 .c { max-width: 0; overflow: hidden; }
+  .wms[data-draw].in .v6 .c { animation: wm-type 1ms steps(1) calc(120ms + var(--i) * 80ms) forwards; }
+  @keyframes wm-type { to { max-width: 1.5em; } }
+  @media (max-width: 40rem) { .v6 { font-size: 1.55rem; } }
+
+  /* ---------- motion that runs after the entrance (off under reduced motion) ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .v3 .twinkle { animation: wm-twinkle 2.4s ease-in-out var(--td) infinite; }
+    .wms[data-draw] .v3 .twinkle { animation: none; transform: scale(0); }
+    .wms[data-draw].in .v3 .twinkle { animation: wm-pop 460ms var(--ease-press) var(--pd) forwards, wm-twinkle 2.4s ease-in-out calc(var(--pd) + 0.5s) infinite; }
+    .v5 .ch { animation: wm-bob 2.6s ease-in-out calc(var(--i) * -240ms) infinite alternate; }
+    .v6 .caret { animation: wm-caret 1.05s steps(1) infinite; }
+
+    /* pointing at the logo */
+    :global(.mark:hover) .wms:not([data-draw]) .v1 .ch, :global(.mark:focus-visible) .wms:not([data-draw]) .v1 .ch { animation: wm-hop 520ms var(--ease-out) calc(var(--i) * 45ms); }
+    :global(.mark:hover) .wms:not([data-draw]) .v1 .spin, :global(.mark:focus-visible) .wms:not([data-draw]) .v1 .spin,
+    :global(.mark:hover) .wms:not([data-draw]) .v2 .spin, :global(.mark:focus-visible) .wms:not([data-draw]) .v2 .spin { animation: wm-spin 700ms var(--ease-out); }
+    :global(.mark:hover) .wms:not([data-draw]) .v2 .pp, :global(.mark:focus-visible) .wms:not([data-draw]) .v2 .pp { animation: wm-squash 560ms var(--ease-out) calc(var(--i) * 40ms); }
+    :global(.mark:hover) .wms:not([data-draw]) .v3 .inner, :global(.mark:focus-visible) .wms:not([data-draw]) .v3 .inner { animation: wm-flick 700ms steps(1); }
+    :global(.mark:hover) .wms:not([data-draw]) .v4 .st, :global(.mark:focus-visible) .wms:not([data-draw]) .v4 .st { animation: wm-march 700ms linear; }
+    :global(.mark:hover) .wms:not([data-draw]) .v5 .ch, :global(.mark:focus-visible) .wms:not([data-draw]) .v5 .ch { animation-duration: 0.7s; }
+    :global(.mark:hover) .wms:not([data-draw]) .v6 .c, :global(.mark:focus-visible) .wms:not([data-draw]) .v6 .c { animation: wm-glitch 420ms steps(1) calc(var(--i) * 25ms); }
+  }
+  @keyframes wm-twinkle { 0%, 100% { transform: scale(1) rotate(0); opacity: 1; } 50% { transform: scale(0.55) rotate(45deg); opacity: 0.6; } }
+  @keyframes wm-bob { from { transform: translateY(-1.8px) rotate(-1.5deg); } to { transform: translateY(1.8px) rotate(1.5deg); } }
+  @keyframes wm-caret { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+  @keyframes wm-hop { 0%, 100% { transform: translateY(0) rotate(0); } 35% { transform: translateY(-4px) rotate(-3deg); } 65% { transform: translateY(0.6px) rotate(1deg); } }
+  @keyframes wm-spin { to { transform: rotate(180deg) scale(1); } }
+  @keyframes wm-squash { 0%, 100% { transform: none; } 30% { transform: scale(1.12, 0.78); } 60% { transform: scale(0.92, 1.14); } }
+  @keyframes wm-march { to { stroke-dashoffset: -22; } }
+  @keyframes wm-glitch { 0%, 100% { transform: none; } 25% { transform: translate(1px, -1px); } 50% { transform: translate(-1px, 1px); } 75% { transform: translate(1px, 1px); } }
+</style>
