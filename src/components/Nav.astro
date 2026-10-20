@@ -38,7 +38,13 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
   .link:hover, .link:focus-visible, .link.current { color: var(--color-text); }
   .link::after { content: ""; position: absolute; left: 0; right: 0; bottom: calc(var(--space-5) - var(--rule-height) / 2); height: var(--rule-height); background: var(--color-line-strong); -webkit-mask: var(--hand-solid-b) left center / var(--rule-tile) var(--rule-height) no-repeat; mask: var(--hand-solid-b) left center / var(--rule-tile) var(--rule-height) no-repeat; transform: scaleX(0); transform-origin: left; transition: transform var(--dur-med) var(--ease-out); }
   .link:hover::after, .link:focus-visible::after, .link.current::after { transform: scaleX(1); }
-  @media (max-width: 40rem) { ul { gap: var(--space-1) var(--space-5); } .link { padding-block: var(--space-2) var(--space-5); } }
+  /* phones: six links in two even rows of three (4 + 2 looked orphaned) on an equal-column grid, with tighter rows */
+  @media (max-width: 40rem) {
+    nav { margin-top: 0; }
+    ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 var(--space-4); }
+    .link { padding-block: var(--space-2) 1.35rem; }
+    .link::after { bottom: calc(1.35rem - var(--rule-height) / 2); }
+  }
   .jp { position: absolute; left: 0; bottom: 0; font-size: var(--step--1); color: var(--color-accent-ink); opacity: 0; transform: translateY(-3px); transition: opacity var(--dur-med), transform var(--dur-med) var(--ease-out); }
   .link:hover .jp, .link:focus-visible .jp, .link.current .jp { opacity: 1; transform: none; }
 </style>

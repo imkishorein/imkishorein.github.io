@@ -28,6 +28,8 @@ const live = to.toUpperCase() === 'NOW';
     .live .tl::after { animation: ds-pulse 2.4s var(--ease-out) infinite; }
     @keyframes ds-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--color-selection); } 60% { box-shadow: 0 0 0 0.4rem transparent; } }
   }
+  /* phones: a slightly smaller stamp so the text beside it keeps more of the width */
+  @media (max-width: 40rem) { .date-stamp { width: 5.75rem; } .stamp { padding: 0.45rem; } .stamp__inner { min-height: 4.4rem; padding: var(--space-1); } }
   .m { white-space: nowrap; font-size: var(--step--2); color: var(--color-text-muted); }
   @media (prefers-reduced-motion: reduce) { .date-stamp { transition: none; } :global(.row:hover) .date-stamp { transform: none; } }
 </style>

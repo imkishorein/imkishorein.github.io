@@ -143,3 +143,8 @@ From screenshots of the LinkedIn profile, as raw material for the Home, About an
 
 - Primary text should say who I am, not where: "Hello, I'm Kishore." Whole hero should look like a real postcard or envelope with stamp, postmark and location.
 - Should feel live: a sense that I am in Bangalore right now (time and weather), not an exact location.
+
+**Mobile audit and haptics (20 Oct 2026)**
+
+- Kishore found positioning and alignment off in the mobile view and asked for a page-by-page audit, starting with Home. Click to stamp did not work on touch.
+- Kishore asked for haptic feedback on mobile for stamping and the paper planes. This picks up the parked 19 Oct haptics idea.

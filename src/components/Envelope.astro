@@ -84,8 +84,9 @@ import { site } from '../data/site';
   .stamp-zone .pm { position: absolute; width: 72%; left: 0; top: 0; z-index: 2; pointer-events: none; }
 
   @media (max-width: 52rem) {
-    .sheet { grid-template-columns: minmax(0, 1fr); grid-template-areas: "message" "stamp" "to"; padding: var(--space-5); gap: var(--space-5); }
-    .stamp-zone { justify-items: start; }
-    .stamp-zone .st { width: min(50%, 9rem); }
+    /* like a real letter, the stamp and postmark sit top right, above the sender, not after all the text */
+    .sheet { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stamp" "message" "to"; padding: var(--space-5); gap: var(--space-5); }
+    .stamp-zone { justify-items: end; }
+    .stamp-zone .st { width: min(46%, 8.5rem); }
   }
 </style>

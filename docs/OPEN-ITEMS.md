@@ -19,6 +19,14 @@
 - [ ] Note page was only checked at desktop widths. Check phone width, dark mode, the pinned right column on short screens, and the copy-link button in a real browser (the test browser blocked the clipboard).
 - [ ] Hero: Japanese label 航空便 (airmail) not checked by a native reader. Weather comes from Open-Meteo at city-centre coordinates (12.97, 77.59): confirm you are happy with a third-party request.
 
+## Mobile audit
+- [x] Home at 375px and 320px (see `DECISIONS.md`)
+- [ ] 320px: the wordmark touches the lantern cord
+- [ ] Audit Notes, a note page, About, Stuff, and the coming-soon pages at phone width
+- [ ] Check dark mode on phones, and real devices (iPhone Safari for the overflow fix and the haptics, Android for vibration). Only tested in the browser emulator.
+- [ ] Haptics were never felt on a real phone. Tune the patterns by hand.
+- [ ] Hero stamp dip may be too subtle on touch (4px). Bigger if it reads weak.
+
 ## Decisions still open
 - [ ] Header wordmark: which of the six styles to keep (Marker, Brush, Neon, Stitched, Playful, Typed), or keep the random mix. Check them at phone width and in dark mode (only checked on desktop in light mode). Typed looks smaller than the others at the same header height.
 - [ ] Reaction totals shared between visitors. Today reactions are per browser only. Needs a small backend (Cloudflare Pages Function with free KV storage); the cap would then be per visitor.
@@ -36,7 +44,7 @@
 - Type specimen page to compare font pairings live
 - Stuff page modelled on hvpandya.com
 - More postcard/stamp pieces per section, per-note stamps
-- Haptics on link clicks and Easter eggs (phones only, see `IDEAS.md`). Open: share the Sound toggle or add its own, and which Easter eggs get it.
+- Haptics on link clicks, the hanko and nav labels (stamp and paper planes are done, see `DECISIONS.md`). Open: which of these get it.
 
 ## Workflow setup
 - [ ] Push this repo to a private GitHub repo so cloud sessions, phone and teleport use the same files

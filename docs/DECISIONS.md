@@ -141,3 +141,15 @@ Why: Kishore preferred this illustration for the logo and favicon.
 ### 2026-10-20: The hero rubber stamp makes no sound on hover
 The soft ink-pad pat that played when the pointer entered the hero is removed. The click-to-stamp thunk stays. The pad sound is still used when hovering a reaction tile on a note.
 Why: Kishore asked for it to go.
+
+### 2026-10-20: Mobile audit, page by page, starting with Home
+Home was audited at 375px and 320px. Fixes: the page no longer scrolls sideways (`html` and `body` both set `overflow-x: clip`, because the lantern's 15rem glow reached past the right edge; html must clip too or the body's overflow is handed to the viewport); the postbox sits 0.6rem in on phones; the nav is two even rows of three on an equal-column grid; the hero stamp and postmark sit top right above the sender, like a real letter, instead of under the PIN boxes; the date stamp is smaller on phones (shared `DateStamp`, so About years shrink too); the dot in "· soon" stays with the word; the footer has less dead space above it and 6rem below so the postbox never covers the last row. Still open: at 320px the wordmark touches the lantern cord. Other pages are not audited yet.
+Why: Kishore saw a lot of positioning and alignment off on phones and asked to tackle it one page at a time.
+
+### 2026-10-20: Tapping the hero stamps on touch
+Replaces the touch half of the hero stamp press. The wooden stamp cursor and ink seal were mouse only, so a tap gave only a faint dip and a sound (sound is off by default), which looked broken. Now a tap, or a pen touch, anywhere on the hero lands the stamp: the ink seal is left where the finger was, the postmark is re-struck if the stamp was hit, and the thunk plays if sound is on. A scroll cancels it, links and buttons keep their own tap, and keyboard Enter and Space still press the stamp. The landing is one shared `land()` function used by mouse and touch.
+Why: Kishore reported click to stamp did not work on mobile.
+
+### 2026-10-20: Haptics on touch phones, not tied to the sound toggle
+Settles the parked 19 Oct haptics idea for stamping and the paper planes only. `haptic()` in `site.ts` uses `navigator.vibrate` on Android and the hidden `<input type="checkbox" switch>` tick on iPhone (iOS 18+, only inside a tap). Patterns (`HAPTICS`): stamp `[14, 55, 34]` (light touch, then the heavier press), plane launch `[10]`, plane hit `[22]`. Runs only when `(pointer: coarse)` and not under reduced motion. It does not follow the sound toggle. iPhone gets the stamp tick only, because the plane fires from a timer with no tap and iOS blocks it; Android needs one tap on the page first. Link clicks, the hanko and the nav labels have no haptics yet.
+Why: Kishore asked for haptics on mobile for stamping and the planes. A vibration is felt only when you touch the phone, and a sound-gated version would be invisible since sound is off by default. Replaces the 19 Oct leaning to share the sound toggle.

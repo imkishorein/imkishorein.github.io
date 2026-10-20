@@ -76,7 +76,8 @@ const href = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 
   
   .art { display: block; width: 7.1rem; height: auto; overflow: visible; filter: drop-shadow(0 6px 8px color-mix(in oklab, var(--color-shadow) 35%, transparent)); }
-  @media (max-width: 40rem) { .art { width: 5.6rem; } .postbox__label { display: none; } }
+  /* the grass reaches about 6px past the art's right edge, so on phones the box sits in a little so nothing hangs off the screen */
+  @media (max-width: 40rem) { .art { width: 5.6rem; } .postbox__label { display: none; } .postbox { right: max(0.6rem, env(safe-area-inset-right)); } }
 
   /* the plane starts at the bottom hatch (centre, about 70% down) */
   .planes { position: absolute; left: 50%; top: 69.5%; width: 0; height: 0; pointer-events: none; }

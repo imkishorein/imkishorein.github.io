@@ -3,7 +3,7 @@
 
 /* ───────── reset ───────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: clip; } /* html must clip too, or the body's overflow is handed to the viewport and clips nothing */
 body, h1, h2, h3, p, ul, ol, figure, dl, dd { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 img, svg { display: block; max-width: 100%; }
@@ -16,6 +16,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: clip; /* the lantern's 15rem glow reaches past the right edge on phones and made the whole page wider than the screen */
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);

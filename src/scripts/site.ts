@@ -90,6 +90,27 @@ const noise = (c: AudioContext, seconds: number, at: number) => {
   src.start(at, Math.random() * (1 - seconds), seconds);
   return src;
 };
+/* ───────── haptics: touch phones only ─────────
+   Android vibrates with navigator.vibrate. iPhone Safari (iOS 18+) has no vibrate, but toggling a hidden <input type="checkbox" switch>
+   gives the system switch tick, and only from inside a tap, so on iPhone the stamp ticks and the paper plane stays silent to the hand.
+   Patterns are [on, off, on...] in ms. Not tied to the sound toggle (a vibration is something you feel only when you touch), and off under reduced motion. */
+const coarse = matchMedia('(pointer: coarse)');
+let tickLabel: HTMLLabelElement | null = null;
+const HAPTICS = { stamp: [14, 55, 34], launch: [10], hit: [22] } as const; // stamp: a light touch down, then the heavier press
+function haptic(pattern: readonly number[]) {
+  if (!coarse.matches || reduceMotion()) return;
+  try {
+    if (navigator.vibrate) { navigator.vibrate(pattern as number[]); return; }
+    if (!tickLabel) {
+      tickLabel = document.createElement('label'); tickLabel.setAttribute('aria-hidden', 'true');
+      tickLabel.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+      const sw = document.createElement('input'); sw.type = 'checkbox'; sw.setAttribute('switch', ''); sw.tabIndex = -1;
+      tickLabel.append(sw); document.body.append(tickLabel);
+    }
+    let at = 0; pattern.forEach((ms, i) => { if (i % 2 === 0) { const t = tickLabel!; setTimeout(() => t.click(), at); } at += ms; }); // one tick per "on" segment
+  } catch { /* no haptics here, which is fine */ }
+}
+
 type Sound = 'tick' | 'switch' | 'thunk' | 'rustle' | 'whoosh' | 'bonk' | 'ping' | 'pad' | 'on';
 function play(kind: Sound, hover = false) {
   if (!soundOn) return;
@@ -214,10 +235,10 @@ function launchPlane() {
   plane.classList.remove('hurt');
   const box = plane.closest('.postbox'); box?.classList.add('sending'); setTimeout(() => box?.classList.remove('sending'), lead + 900);
   plane.animate(kf, { duration: total, delay: lead, fill: 'backwards', easing: 'linear' });
-  setTimeout(() => play('whoosh', true), lead);
+  setTimeout(() => { play('whoosh', true); haptic(HAPTICS.launch); }, lead);
   const hit = els[flight.hitId];
   setTimeout(() => { // the hit: a tap sound and a tiny shake of whatever it landed on (individual properties, so existing transforms survive)
-    play('bonk', true); plane.classList.add('hurt');                       // dented nose and creases for the fall
+    play('bonk', true); haptic(HAPTICS.hit); plane.classList.add('hurt');                       // dented nose and creases for the fall
     let shake = hit; while (shake && getComputedStyle(shake).display === 'inline' && shake.parentElement && shake.parentElement.tagName !== 'MAIN') shake = shake.parentElement;
     if (shake && shake.tagName !== 'BODY' && shake.tagName !== 'MAIN') shake.animate(
       [{ translate: '0 0', rotate: '0deg' }, { translate: '-3px 1px', rotate: '-0.25deg', offset: 0.3 }, { translate: '2px 0', rotate: '0.15deg', offset: 0.6 }, { translate: '0 0', rotate: '0deg' }],
@@ -321,6 +342,20 @@ const pressStamp = () => {
   heroStamp.animate([{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(4px) rotate(-1deg)' }, { transform: 'translateY(0) rotate(0)' }], { duration: 260, easing: 'cubic-bezier(.5,0,.2,1.4)' });
   mark?.animate([{ opacity: 0.2, transform: 'scale(1.18) rotate(-6deg)' }, { opacity: 1, transform: 'scale(1) rotate(0)' }], { duration: 380, easing: 'cubic-bezier(.2,.7,.2,1)' });
 };
+/* the stamp lands: sound, the hero stamp's dip if it was hit, and the ink seal left where the press was */
+const land = (x: number, y: number, onStamp: boolean) => {
+  if (!hero) return;
+  const still = reduceMotion();
+  if (onStamp) pressStamp(); else play('thunk');
+  haptic(HAPTICS.stamp);
+  const r = hero.getBoundingClientRect(), seal = document.createElement('div');
+  const wish = nextWish(), fit = sealFit(wish[1]);
+  seal.className = 'stamp-impression'; seal.innerHTML = sealSvg(wish, fit);
+  seal.style.width = seal.style.height = `${fit.size}px`; seal.style.margin = `${-fit.size / 2}px 0 0 ${-fit.size / 2}px`;
+  seal.style.left = `${x - r.left}px`; seal.style.top = `${y - r.top}px`; seal.style.transform = `rotate(${(Math.random() * 16 - 8).toFixed(1)}deg)`;
+  seal.style.opacity = String(0.8 + Math.random() * 0.15); hero.append(seal);
+  if (!still) seal.animate([{ scale: '1.14', opacity: 0 }, { scale: '1', offset: 0.35 }], { duration: 220, easing: 'ease-out' });
+};
 let struck = false; // a mouse press already handled by the cursor stamp, so the click that follows is ignored
 if (hero && canHover.matches) {
   const cur = document.createElement('div'); cur.className = 'stamp-cursor'; cur.innerHTML = STAMP_SVG; document.body.append(cur);
@@ -358,16 +393,7 @@ if (hero && canHover.matches) {
       { transform: 'translateY(0.5px) rotate(0deg) scale(1, .97)', offset: 0.55 },
       { transform: 'translateY(0) rotate(6deg)', offset: 1 },
     ], { duration: time, easing: 'ease-out' });
-    setTimeout(() => { // the stamp lands
-      if (onStamp) pressStamp(); else play('thunk');
-      const r = hero.getBoundingClientRect(), seal = document.createElement('div');
-      const wish = nextWish(), fit = sealFit(wish[1]);
-      seal.className = 'stamp-impression'; seal.innerHTML = sealSvg(wish, fit);
-      seal.style.width = seal.style.height = `${fit.size}px`; seal.style.margin = `${-fit.size / 2}px 0 0 ${-fit.size / 2}px`;
-      seal.style.left = `${x - r.left}px`; seal.style.top = `${y - r.top}px`; seal.style.transform = `rotate(${(Math.random() * 16 - 8).toFixed(1)}deg)`;
-      seal.style.opacity = String(0.8 + Math.random() * 0.15); hero.append(seal);
-      if (!still) seal.animate([{ scale: '1.14', opacity: 0 }, { scale: '1', offset: 0.35 }], { duration: 220, easing: 'ease-out' });
-    }, impact);
+    setTimeout(() => land(x, y, onStamp), impact);
   });
 }
 /* reactions on a note: the same wooden stamp follows the mouse over the four tiles instead of a hand pointer.
@@ -395,7 +421,14 @@ if (reactTiles.length && canHover.matches) {
     });
   });
 }
-/* touch and keyboard: no cursor, so the hero stamp presses at once */
+/* touch and pen: no cursor to follow, so a tap on the hero lands the stamp straight away and leaves its ink where the finger was.
+   A scroll fires pointercancel instead of pointerup, so scrolling past the hero stays silent. Links keep their own tap. */
+if (hero) hero.addEventListener('pointerup', (e) => {
+  if (e.pointerType === 'mouse' || e.shiftKey || (e.target as Element).closest('a, button')) return;
+  const onStamp = !!heroStamp?.contains(e.target as Node);
+  struck = onStamp; land(e.clientX, e.clientY, onStamp); // the click that follows a tap on the stamp is then skipped
+});
+/* keyboard (and any click not already handled above): the hero stamp presses at once */
 heroStamp?.addEventListener('click', (e) => { if ((e as MouseEvent).shiftKey) return; if (struck) { struck = false; return; } pressStamp(); }); // shift-click is the hanko
 heroStamp?.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); pressStamp(); } });
 

@@ -20,6 +20,8 @@ const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'n
 <style>
   .foot { padding-block: var(--space-9) var(--space-6); display: grid; gap: var(--space-7); }
   .foot__top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-6); align-items: end; }
+  /* phones: less dead space above the footer, and room at the bottom so the corner postbox never sits on the last row */
+  @media (max-width: 40rem) { .foot { padding-block: var(--space-7) 6rem; gap: var(--space-6); } }
   .mail { font-size: var(--step-3); text-decoration: none; word-break: break-all; border-bottom: 2px solid var(--color-accent); transition: border-color var(--dur-fast); }
   .mail:hover { border-color: var(--color-text); }
   .links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
