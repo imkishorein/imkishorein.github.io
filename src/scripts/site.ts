@@ -12,19 +12,38 @@ const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matche
 
 /* ───────── theme ───────── */
 const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
-const themeLabel = document.querySelector<HTMLElement>('[data-theme-label]');
 const isDark = () => root.dataset.theme === 'dark'; // light is the default, no OS sniffing
 const paintTheme = () => {
-  if (!themeBtn || !themeLabel) return;
-  themeBtn.setAttribute('aria-pressed', String(isDark()));
-  themeLabel.textContent = isDark() ? 'Dark' : 'Light';
+  themeBtn?.setAttribute('aria-pressed', String(isDark())); // pressed = dark = the lantern is out
 };
 themeBtn?.addEventListener('click', () => {
   const next = isDark() ? 'light' : 'dark';
-  root.dataset.theme = next;
-  store.set('imk:theme', next);
-  paintTheme();
+  const apply = () => {
+    root.dataset.theme = next;
+    store.set('imk:theme', next);
+    paintTheme();
+    if (themeBtn) { // a one-off kick: the lantern flares up and sends out a ring when lit, swings itself still when put out
+      themeBtn.dataset.just = next === 'dark' ? 'off' : 'on';
+      setTimeout(() => delete themeBtn.dataset.just, 1500);
+    }
+  };
   play('switch');
+  const startVT = (document as any).startViewTransition?.bind(document);
+  if (!startVT || reduceMotion() || !themeBtn) { apply(); return; }
+  /* The change spreads out from the lantern like light: switching to light, the light page grows out of the
+     lantern; switching to dark, the light page shrinks back into it and the dark shows underneath. */
+  const body = themeBtn.querySelector('.body') ?? themeBtn;
+  const rect = body.getBoundingClientRect();
+  const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const toDark = next === 'dark';
+  root.dataset.vt = toDark ? 'to-dark' : 'to-light';
+  const vt = startVT(apply);
+  vt.ready.then(() => {
+    const small = `circle(0px at ${x}px ${y}px)`, big = `circle(${radius}px at ${x}px ${y}px)`;
+    root.animate({ clipPath: toDark ? [big, small] : [small, big] }, { duration: 800, easing: 'cubic-bezier(.4, 0, .2, 1)', pseudoElement: toDark ? '::view-transition-old(root)' : '::view-transition-new(root)' });
+  });
+  vt.finished.finally(() => { delete root.dataset.vt; });
 });
 paintTheme();
 

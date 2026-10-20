@@ -1,6 +1,7 @@
 # Open items
 
 ## Needs real content from Kishore
+- [x] WhatsApp number for the postbox: Kishore supplied +91 8220676721 on 2026-10-20 (`site.whatsapp` in `src/data/site.ts`). The pre-filled message is still mine to reword.
 - [ ] Contact email (currently placeholder hello@imkishore.in), GitHub, Instagram and Figma links
 - [ ] Portrait: a front-facing illustrated avatar now stands in (hand-drawn SVG from two of Kishore's photos, `PortraitArt.astro`). Review the likeness. A real photo could still be added to About later.
 - [ ] Stuff list. Camera gear is real (Sony A6700, Tamron 17-70 f/2.8, Sigma 56 f/1.4). The rest is placeholder.

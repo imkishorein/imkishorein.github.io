@@ -1,0 +1,88 @@
+---
+// A little hand-drawn Japanese pillar postbox (round body, 〒 plaque, hooded slot) pinned to the bottom-right corner.
+// Hover or focus it and the hood lifts and a WhatsApp bubble pops out, like a letter picked from the box. Click opens a WhatsApp chat (wa.me deep link).
+// The number is a placeholder in src/data/site.ts. Colours are tokens (ink body, sage details), so it follows
+// light and dark mode. The motion is off under reduced motion: the open state just shows on hover or focus.
+import { site } from '../data/site';
+const { number, message } = site.whatsapp;
+const href = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+---
+<a class="postbox" href={href} target="_blank" rel="noopener" aria-label="Drop me a message on WhatsApp" data-sound="thunk" data-sound-hover="rustle">
+  <span class="postbox__label label" aria-hidden="true">Drop a line</span>
+  <svg viewBox="0 0 72 96" aria-hidden="true" focusable="false">
+    <ellipse class="shadow" cx="36" cy="93" rx="27" ry="3.2" />
+
+    <!-- a round Japanese pillar postbox: cylinder body, lid, round plaque with the 〒 mark, hooded slot, collar -->
+    <path class="base" d="M10 88 L62 88 C63.4 88 64 89 64 90.4 C64 92 63 92.8 61.6 92.8 L10.6 92.8 C9 92.8 8.2 91.8 8.2 90.4 C8.2 89 9 88 10 88 Z" />
+    <path class="body" d="M14.6 22 C14.2 40 15 66 14.6 86 C14.6 87.6 15.8 88.4 17.4 88.4 L55 88.2 C56.6 88.2 57.4 87.2 57.2 85.6 C57.6 66 57 40 57.4 22 Z" />
+    <path class="shine" d="M19 26 C18.6 44 19.2 64 18.8 82 L22.6 82 C23 64 22.4 44 22.8 26 Z" />
+    <path class="lid" d="M11.4 19.6 C11 11.8 24 8.6 36 8.6 C48 8.6 61 11.8 60.6 19.6 C60.8 22.2 59.4 23.6 57.6 23.8 C46 24.6 26 24.6 14.4 23.8 C12.6 23.6 11.2 22.2 11.4 19.6 Z" />
+    <path class="rim" d="M17 17 C24 14.6 48 14.6 55 17" />
+
+    <circle class="plaque" cx="36" cy="46" r="18.4" />
+    <circle class="plaque-rim" cx="36" cy="46" r="16.2" />
+    <g class="mark" transform="translate(0 1.6)">
+      <path d="M27.6 38 C32 37.4 40 37.4 44.4 38 L44.2 40.8 C40 41.4 32 41.4 27.8 40.8 Z" />
+      <path d="M25.4 43.2 C31 42.6 41 42.6 46.6 43.2 L46.4 46 C41 46.6 31 46.6 25.6 46 Z" />
+      <path d="M34.6 45.6 C35.4 45.4 36.6 45.4 37.4 45.6 L37.6 52 C36.6 52.4 35.4 52.4 34.4 52 Z" />
+    </g>
+    <text class="kanji" x="36" y="60.4" text-anchor="middle" lang="ja">郵便</text>
+
+    <path class="slot" d="M20.6 31 C28 30 44 30 51.4 31 C51.8 33.2 51.6 35.4 51 36.4 C44 35.6 28 35.6 21 36.4 C20.4 35.4 20.2 33.2 20.6 31 Z" />
+    <path class="hood" d="M17.8 33.6 C19 25.4 53 25.4 54.2 33.6 C53.6 35 52.6 35.4 51.6 35 C44 33.2 28 33.2 20.4 35 C19.4 35.4 18.2 35 17.8 33.6 Z" />
+
+    <path class="collar" d="M11.6 69 C11.4 66.2 60.6 66.2 60.4 69 L61 74 C61.2 76 10.8 76 11 74 Z" />
+    <path class="hatch" d="M26 79 C31 78.4 41 78.4 46 79 C46.4 81.6 46.2 84.4 45.8 85.6 C41 86.2 31 86.2 26.2 85.6 C25.8 84.4 25.6 81.6 26 79 Z" />
+    <circle class="key" cx="36" cy="82.3" r="1.2" />
+
+    <!-- the WhatsApp bubble: invisible and tucked at the slot until the box opens, then it pops up above the lid -->
+    <g class="chat"><g class="bob">
+      <path class="bubble" d="M36 33 C43.2 32.6 49.8 38 49.6 45.4 C49.4 52.6 43 58.4 35.8 57.8 C33.2 57.6 30.8 56.8 28.8 55.6 L22.4 57.6 L24.6 51.4 C22.6 49 22.2 46.6 22.6 44.2 C23.4 37.8 29.2 33.4 36 33 Z" />
+      <path class="handset" d="M30.8 40.6 C31.8 39.6 33 39.8 33.6 40.8 L34.6 42.8 C35 43.6 34.8 44.2 34.2 44.8 L33.4 45.6 C34.4 47.6 36 49.2 38 50.2 L38.8 49.4 C39.4 48.8 40 48.6 40.8 49 L42.8 50 C43.8 50.6 44 51.8 43 52.8 C41.6 54.2 39.2 54.2 36.6 52.8 C33.2 51 30.8 48.4 29.4 45 C28.6 43 29.2 41.6 30.8 40.6 Z" />
+    </g></g>
+  </svg>
+</a>
+<style>
+  .postbox {
+    position: fixed; z-index: 30; right: max(0.9rem, env(safe-area-inset-right)); bottom: max(0.9rem, env(safe-area-inset-bottom));
+    display: flex; align-items: flex-end; gap: var(--space-2); text-decoration: none; color: var(--color-text); -webkit-tap-highlight-color: transparent;
+  }
+  svg { width: 4.4rem; height: auto; overflow: visible; filter: drop-shadow(0 6px 8px color-mix(in oklab, var(--color-shadow) 35%, transparent)); }
+  @media (max-width: 40rem) { svg { width: 3.5rem; } .postbox__label { display: none; } }
+
+  .shadow { fill: var(--color-shadow); opacity: 0.25; }
+  .body { fill: var(--color-text); }
+  .shine { fill: var(--color-surface); opacity: 0.18; }
+  .lid, .collar, .hood, .hatch, .base { fill: var(--color-accent); }
+  .rim { fill: none; stroke: var(--color-text); stroke-width: 1.2; stroke-linecap: round; opacity: 0.5; }
+  .plaque { fill: var(--color-accent); }
+  .plaque-rim { fill: var(--color-text); }
+  .mark { fill: var(--color-surface); }
+  .kanji { fill: var(--color-surface); font-family: var(--font-jp); font-size: 6.6px; font-weight: 700; letter-spacing: 0.5px; }
+  .slot { fill: var(--color-surface); }
+  .key { fill: var(--color-text); }
+  .bubble { fill: var(--color-accent); stroke: var(--color-text); stroke-width: 1.8; stroke-linejoin: round; }
+  .handset { fill: var(--color-text); }
+
+  .postbox__label { padding: 0.15rem 0.45rem; background: var(--color-surface); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1); white-space: nowrap; opacity: 0; transform: translateX(6px); pointer-events: none; }
+
+  /* closed: the bubble is tucked at the slot, the hood is down */
+  .chat { transform-box: fill-box; transform-origin: 50% 100%; transform: translateY(-12px) scale(0.3); opacity: 0; }
+  .hood { transform-box: fill-box; transform-origin: 0% 100%; }
+  .bob { transform-box: fill-box; transform-origin: 50% 60%; }
+
+  /* open on hover and on keyboard focus: the hood lifts, the bubble pops out above the lid */
+  .postbox:hover .hood, .postbox:focus-visible .hood { transform: translateY(-5px) rotate(-9deg); }
+  .postbox:hover .chat, .postbox:focus-visible .chat { transform: translateY(-50px) scale(1.2) rotate(-8deg); opacity: 1; }
+  .postbox:hover .postbox__label, .postbox:focus-visible .postbox__label { opacity: 1; transform: none; }
+  .postbox:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-2); }
+  .postbox:active svg { transform: translateY(1px); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .postbox:hover .bob, .postbox:focus-visible .bob { animation: bob 1.4s ease-in-out 0.55s infinite alternate; }
+    @keyframes bob { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-3px) rotate(3deg); } }
+    .hood { transition: transform var(--dur-med) var(--ease-press); }
+    .chat { transition: transform 460ms var(--ease-press) 90ms, opacity var(--dur-fast) 90ms; }
+    .postbox__label { transition: opacity var(--dur-med), transform var(--dur-med) var(--ease-out); }
+  }
+</style>

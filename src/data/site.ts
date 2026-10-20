@@ -20,6 +20,8 @@ export const site = {
   bio: 'Senior UX Designer working at the intersection of Enterprise SaaS, AI and Platform Engineering. I lead the Friends of Figma Bangalore community and write short notes here about what I build and learn.',
   // PLACEHOLDER: swap for a real public address.
   email: 'hello@imkishore.in',
+  // The postbox in the corner opens a WhatsApp chat. Number is digits only with country code, no + or spaces.
+  whatsapp: { number: '918220676721', message: 'Hi Kishore, I found your site and wanted to say hi.' },
   links: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/imkishorein/' },
     // PLACEHOLDER links: replace or delete.

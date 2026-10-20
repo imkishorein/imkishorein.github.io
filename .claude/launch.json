@@ -6,7 +6,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
-        "dev"
+        "dev:keep"
       ],
       "port": 4321
     }

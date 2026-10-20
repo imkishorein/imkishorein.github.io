@@ -157,3 +157,10 @@ main { flex: 1; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ───────── theme change: light spreads out of the lantern (see src/scripts/site.ts) ───────── */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html[data-vt="to-light"]::view-transition-new(root) { z-index: 2; }
+html[data-vt="to-light"]::view-transition-old(root) { z-index: 1; }
+html[data-vt="to-dark"]::view-transition-old(root) { z-index: 2; }
+html[data-vt="to-dark"]::view-transition-new(root) { z-index: 1; }

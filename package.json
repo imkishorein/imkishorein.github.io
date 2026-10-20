@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "dev:keep": "sh scripts/dev-keepalive.sh",
     "build": "npm run check:tokens && astro build",
     "preview": "astro preview",
     "check:tokens": "node scripts/check-tokens.mjs"
