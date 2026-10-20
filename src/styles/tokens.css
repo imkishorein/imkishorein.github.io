@@ -48,6 +48,18 @@
   --art-mid:   var(--palette-sage);
   --art-light: var(--palette-paper);
 
+  /* Postbox (corner postbox, plinth and grass). Own roles because a plain ink-on-paper flip turns it into an
+     X-ray in dark mode: here the box stays a deep green object with sage trim, the stone and grass shift to match. */
+  --pb-ink:        light-dark(var(--palette-olive), color-mix(in oklab, var(--palette-olive) 90%, var(--palette-sage)));
+  --pb-paper:      light-dark(color-mix(in oklab, var(--palette-paper) 55%, white), var(--palette-paper));
+  --pb-trim:       var(--palette-sage);
+  --pb-stone-top:  light-dark(color-mix(in oklab, color-mix(in oklab, var(--palette-paper) 55%, white) 70%, var(--palette-olive)), color-mix(in oklab, var(--palette-sage) 42%, var(--palette-olive)));
+  --pb-stone-front:light-dark(color-mix(in oklab, color-mix(in oklab, var(--palette-paper) 55%, white) 45%, var(--palette-olive)), color-mix(in oklab, var(--palette-sage) 28%, var(--palette-olive)));
+  --pb-stone-ring: light-dark(color-mix(in oklab, color-mix(in oklab, var(--palette-paper) 55%, white) 55%, var(--palette-olive)), color-mix(in oklab, var(--palette-sage) 36%, var(--palette-olive)));
+  --pb-stone-side: light-dark(color-mix(in oklab, color-mix(in oklab, var(--palette-paper) 55%, white) 30%, var(--palette-olive)), color-mix(in oklab, var(--palette-sage) 20%, var(--palette-olive)));
+  --pb-grass-a:    light-dark(color-mix(in oklab, var(--palette-sage) 72%, var(--palette-olive)), color-mix(in oklab, var(--palette-sage) 70%, var(--palette-olive)));
+  --pb-grass-b:    var(--palette-sage);
+
   /* ───────── 2. FONT ROLES ─────────
      Family names come from fonts.css. */
   --font-sans:    "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;

@@ -152,7 +152,7 @@ function play(kind: Sound, hover = false) {
   }
 }
 
-/* The postbox paper plane (Postbox.astro). Every 30s it is tossed out of the slot, swoops up and over, and flies at a
+/* The postbox paper plane (Postbox.astro). Every 30s it is tossed out of the bottom hatch, swoops up and over, and flies at a
    random piece of the page (a line of text, a stamp, a heading...). It taps into it, the target gives a tiny shake,
    the plane bounces back, tumbles and falls. Everything is built from the live layout, so it never hits a fixed spot.
    Sounds only play when sound is on and audio is already running. Skipped under reduced motion. */
@@ -160,28 +160,35 @@ const plane = document.querySelector<SVGElement>('.postbox .plane');
 const still = matchMedia('(prefers-reduced-motion: reduce)');
 const HITTABLE = 'main h1, main h2, main h3, main p, main li, main a, main img, .stamp, .pm';
 function pickTarget(ox: number, oy: number) {
-  const hits: { x: number; y: number; el: HTMLElement }[] = [];
+  const H = innerHeight, W = innerWidth, avoid = plane?.closest('.postbox')?.getBoundingClientRect();
+  const hits: { x: number; y: number; side: number; el: HTMLElement }[] = [];
   document.querySelectorAll<HTMLElement>(HITTABLE).forEach((el) => {
     if (el.closest('.postbox, nav, header, footer')) return;
     const r = document.createRange(); r.selectNodeContents(el);
     const rects = el.matches('img, .stamp, .pm') ? [el.getBoundingClientRect()] : [...r.getClientRects()];
-    rects.forEach((q) => { // a visible line of text or box, clear of the top bar and left of the postbox
-      if (q.width < 24 || q.height < 10 || q.top < 70 || q.bottom > oy - 30 || q.right > ox - 40 || q.right < 40) return;
-      hits.push({ x: q.right, y: q.top + q.height * (0.25 + Math.random() * 0.5), el });
+    rects.forEach((q) => { // anything visible right now (so it follows the scroll position), clear of the top bar and the postbox
+      if (q.width < 24 || q.height < 10 || q.top < 70 || q.bottom > H - 12 || q.left < 0 || q.right > W) return;
+      if (avoid && q.right > avoid.left - 10 && q.left < avoid.right && q.bottom > avoid.top - 10) return;
+      const side = q.right < ox - 40 ? 1 : -1;                              // 1: hit its right edge flying left; -1: its left edge flying right
+      hits.push({ x: side === 1 ? q.right : q.left, y: q.top + q.height * (0.25 + Math.random() * 0.5), side, el });
     });
   });
-  return hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
+  if (!hits.length) return null;
+  const want = 70 + Math.random() * (H - 100);                              // a random height on screen, so top, middle and bottom all get hit
+  hits.sort((m, n) => Math.abs(m.y - want) - Math.abs(n.y - want));
+  return hits[Math.floor(Math.random() * Math.min(5, hits.length))];
 }
 function launchPlane() {
   const origin = plane?.parentElement?.getBoundingClientRect();
   if (!plane || !origin || document.hidden || still.matches) return;
   const ox = origin.x, oy = origin.y, rnd = (a: number, b: number) => a + Math.random() * (b - a);
   const hit = pickTarget(ox, oy); if (!hit) return;
-  const tx = hit.x - ox + 16, ty = hit.y - oy;                              // plane centre at impact, relative to the slot
-  const p1 = { x: tx * 0.1 - 20, y: Math.min(ty, 0) - rnd(60, 200) };       // climb out of the slot first
-  const p2 = { x: tx + rnd(120, 260), y: ty + rnd(-70, 40) };               // then come in at the target from the right
+  const tx = hit.x - ox + 16 * hit.side, ty = hit.y - oy;                              // plane centre at impact, relative to the hatch
+  const p1 = { x: tx * 0.1 - 20, y: Math.min(ty, 0) - rnd(60, 200) };       // climb out of the hatch first
+  const p2 = { x: tx + hit.side * rnd(120, 260), y: ty + rnd(-70, 40) };               // then come in at the target from the right
   const flight = Math.min(5200, 2600 + Math.hypot(tx, ty) * 3), N = 30;
-  const bounce = 260, fall = 1100, total = flight + bounce + fall;
+  const drop = innerHeight - hit.y + 30;                                   // fall all the way to the bottom of the viewport
+  const bounce = 260, fall = 450 + Math.sqrt(drop) * 32, total = flight + bounce + fall;
   const kf: Keyframe[] = []; let prev = 0, endRot = 0;
   for (let i = 0; i <= N; i++) {
     const u = i / N, p = 1 - Math.pow(1 - u, 1.4), q = 1 - p;               // quick toss, slower glide
@@ -197,18 +204,19 @@ function launchPlane() {
   }
   const at = (dx: number, dy: number, rot: number, opacity: number, ms: number, easing = 'linear'): Keyframe =>
     ({ offset: ms / total, opacity, easing, transform: `translate(${(tx + dx).toFixed(1)}px, ${(ty + dy).toFixed(1)}px) rotate(${(endRot + rot).toFixed(1)}deg) scale(1.3)` });
-  const drift = rnd(10, 40), spin = rnd(140, 260) * (Math.random() < 0.5 ? -1 : 1), drop = rnd(180, 320);
-  kf.push(at(14, -8, -32, 1, flight + bounce, 'cubic-bezier(0.55, 0, 1, 0.6)'));              // knocked back, then gravity
-  kf.push(at(14 + drift * 0.5, drop * 0.55, spin * 0.5, 1, flight + bounce + fall * 0.65));
-  kf.push(at(14 + drift, drop, spin, 0, total));
-  plane.animate(kf, { duration: total, easing: 'linear' });
-  play('whoosh', true);
+  const drift = rnd(10, 40), spin = rnd(140, 260) * (Math.random() < 0.5 ? -1 : 1);
+  kf.push(at(14 * hit.side, -8, -32 * hit.side, 1, flight + bounce, 'linear'));                                     // knocked back, then gravity
+  [0.25, 0.5, 0.75, 1].forEach((f) => kf.push(at((14 + drift * f) * hit.side, drop * f * f, spin * f, f < 0.85 ? 1 : 0, flight + bounce + fall * f)));
+  const box = plane.closest('.postbox'), lead = 280;                      // the hatch drops open first, then the plane slips out
+  box?.classList.add('sending'); setTimeout(() => box?.classList.remove('sending'), lead + 900);
+  plane.animate(kf, { duration: total, delay: lead, fill: 'backwards', easing: 'linear' });
+  setTimeout(() => play('whoosh', true), lead);
   setTimeout(() => { // the hit: a tap sound and a tiny shake of whatever it landed on (individual properties, so existing transforms survive)
     play('bonk', true);
     if (getComputedStyle(hit.el).display !== 'inline') hit.el.animate(
       [{ translate: '0 0', rotate: '0deg' }, { translate: '-3px 1px', rotate: '-0.25deg', offset: 0.3 }, { translate: '2px 0', rotate: '0.15deg', offset: 0.6 }, { translate: '0 0', rotate: '0deg' }],
       { duration: 320, easing: 'ease-out' });
-  }, flight);
+  }, lead + flight);
 }
 setTimeout(() => { launchPlane(); setInterval(launchPlane, 30000); }, 3000);
 
