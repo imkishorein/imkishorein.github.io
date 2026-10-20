@@ -221,6 +221,7 @@ function collectRects() {
 function launchPlane() {
   const origin = plane?.parentElement?.getBoundingClientRect();
   if (!plane || !origin || document.hidden || still.matches) return;
+  if (origin.bottom < 0 || origin.top > innerHeight) return; // on phones the postbox stands at the page bottom, so the plane only flies when it is on screen
   const { rects, els } = collectRects(); if (!rects.length) return;
   const flight = planFlight({ ox: origin.x, oy: origin.y, W: innerWidth, H: innerHeight, rects }); if (!flight) return;
   const lead = 280, total = flight.duration * 1000, s = flight.samples;   // the hatch drops open first, then the plane slips out
@@ -432,17 +433,31 @@ if (hero) hero.addEventListener('pointerup', (e) => {
 heroStamp?.addEventListener('click', (e) => { if ((e as MouseEvent).shiftKey) return; if (struck) { struck = false; return; } pressStamp(); }); // shift-click is the hanko
 heroStamp?.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); pressStamp(); } });
 
-/* ───────── hidden: shift-click leaves a hanko mark ───────── */
-document.addEventListener('click', (e) => {
-  if (!e.shiftKey) return;
-  e.preventDefault();
-  play('thunk');
+/* the postbox on a touch phone: the same press haptic as the stamp; the link itself opens WhatsApp straight away */
+document.querySelector('.postbox')?.addEventListener('click', () => haptic(HAPTICS.stamp));
+
+/* ───────── hidden: shift-click leaves a hanko mark ─────────
+   On touch there is no Shift key, so the seal in the footer does the same thing when tapped (or pressed with Enter or Space):
+   a hanko lands somewhere above it, on the page, and fades. */
+function leaveHanko(x: number, y: number) {
+  play('thunk'); haptic(HAPTICS.stamp);
   const mark = document.createElement('span');
   mark.className = 'hanko'; mark.lang = 'ja'; mark.textContent = '印'; mark.setAttribute('aria-hidden', 'true');
   const tilt = (Math.random() * 16 - 8).toFixed(1);
-  Object.assign(mark.style, { position: 'absolute', left: `${e.pageX - 21}px`, top: `${e.pageY - 21}px`, zIndex: '20', pointerEvents: 'none', transform: `rotate(${tilt}deg)`, opacity: '0.9' });
+  Object.assign(mark.style, { position: 'absolute', left: `${x - 21}px`, top: `${y - 21}px`, zIndex: '20', pointerEvents: 'none', transform: `rotate(${tilt}deg)`, opacity: '0.9' });
   document.body.append(mark);
   if (reduceMotion()) { setTimeout(() => mark.remove(), 2400); return; }
   mark.animate([{ transform: `scale(1.6) rotate(${tilt}deg)`, opacity: 0 }, { transform: `scale(1) rotate(${tilt}deg)`, opacity: 0.9 }], { duration: 220, easing: 'cubic-bezier(.5,0,.2,1.4)' });
   setTimeout(() => mark.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 900, fill: 'forwards' }).finished.then(() => mark.remove()), 1800);
+}
+document.addEventListener('click', (e) => {
+  if (!e.shiftKey) return;
+  e.preventDefault();
+  leaveHanko(e.pageX, e.pageY);
+});
+document.querySelector<HTMLElement>('[data-hanko]')?.addEventListener('click', (e) => {
+  if ((e as MouseEvent).shiftKey) return; // the shift-click handler above already leaves one where the pointer is
+  const seal = e.currentTarget as HTMLElement, r = seal.getBoundingClientRect();
+  const wrap = seal.closest('.wrap')?.getBoundingClientRect() ?? r;
+  leaveHanko(wrap.left + 30 + Math.random() * Math.max(wrap.width * 0.5 - 30, 0), scrollY + r.top - 60 - Math.random() * 160); // left half only, so it never lands on the postbox
 });

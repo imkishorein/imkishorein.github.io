@@ -8,7 +8,7 @@ const { number, message } = site.whatsapp;
 const href = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 ---
 <a class="postbox" href={href} target="_blank" rel="noopener" aria-label="Drop me a message on WhatsApp" data-sound="thunk" data-sound-hover="ping">
-  <span class="postbox__label label" aria-hidden="true">Drop a line</span>
+  <span class="postbox__label label" aria-hidden="true">Drop a line<span class="postbox__wa"> on WhatsApp</span></span>
   <span class="box">
   <!-- a paper plane is tossed out of the bottom hatch every 30s and flies off across the page in a random direction. The flight is driven by src/scripts/site.ts (Web Animations). Decorative, and skipped under reduced motion -->
   <span class="planes" aria-hidden="true">
@@ -76,8 +76,7 @@ const href = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 
   
   .art { display: block; width: 7.1rem; height: auto; overflow: visible; filter: drop-shadow(0 6px 8px color-mix(in oklab, var(--color-shadow) 35%, transparent)); }
-  /* the grass reaches about 6px past the art's right edge, so on phones the box sits in a little so nothing hangs off the screen */
-  @media (max-width: 40rem) { .art { width: 5.6rem; } .postbox__label { display: none; } .postbox { right: max(0.6rem, env(safe-area-inset-right)); } }
+  .postbox__wa { display: none; }
 
   /* the plane starts at the bottom hatch (centre, about 70% down) */
   .planes { position: absolute; left: 50%; top: 69.5%; width: 0; height: 0; pointer-events: none; }
@@ -138,4 +137,23 @@ const href = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
     .chat { transition: transform 700ms var(--ease-press) 160ms, opacity 120ms 160ms; }
     .postbox__label { transition: opacity var(--dur-med), transform var(--dur-med) var(--ease-out); }
   }
+  /* ───────── phones and touch ─────────
+     On a phone the postbox is not pinned over the content: it stands in the page at the very bottom, under the footer, so reading is never
+     covered. There is no hover on touch, so it rests in its "open" state: hatch open, the WhatsApp bubble out of the box and bobbing, and the label
+     says what a tap does. A tap pops the bubble (and gives a small haptic, see site.ts). */
+  @media (max-width: 40rem) {
+    .postbox { position: relative; right: auto; bottom: auto; justify-self: end; align-self: end; padding: 3.75rem 0 0; }
+    .postbox__label { white-space: normal; max-width: 7.5rem; text-align: left; line-height: 1.35; margin-bottom: 1.3rem; } /* two short lines, so the seal, label and box always fit across a narrow phone */
+    .art { width: 6.2rem; }
+  }
+  @media (max-width: 40rem), (hover: none) {
+    .postbox__label { opacity: 1; transform: none; }
+    .postbox__wa { display: inline; }
+    .postbox .hatch { transform: translateY(1.2px) scaleY(0.2); }
+    .postbox .key { opacity: 0; }
+    .postbox .chat { transform: translateY(-50px) scale(1.2) rotate(-8deg); opacity: 1; transition-delay: 0s; }
+    .postbox:active .chat { transform: translateY(-54px) scale(1.4) rotate(-4deg); }
+    @media (prefers-reduced-motion: no-preference) { .postbox .bob { animation: bob 1.4s ease-in-out infinite alternate; } }
+  }
+
 </style>

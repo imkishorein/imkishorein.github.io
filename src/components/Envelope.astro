@@ -28,8 +28,9 @@ import { site } from '../data/site';
 </svg>
 <article class="envelope">
   <div class="sheet">
+    <p class="label muted par"><span lang="ja">航空便</span> · Par avion</p>
     <div class="message">
-      <p class="label muted"><span lang="ja">航空便</span> · Par avion</p>
+      <p class="label muted par-in"><span lang="ja">航空便</span> · Par avion</p>
       <div class="from">
         <p class="label muted">From</p>
         <h1 id="hero-title" class="display h-hero">Kishore<br />Vidyasagar.</h1>
@@ -68,6 +69,7 @@ import { site } from '../data/site';
   }
   /* inner edge drawn as a slightly wobbly line instead of a perfect border */
   .sheet::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 1.5px solid var(--color-line-strong); filter: url(#env-line); pointer-events: none; }
+  .par { display: none; } /* phone-only copy that sits above the stamp, see the media query */
   .message { grid-area: message; display: flex; flex-direction: column; gap: var(--space-4); align-self: start; }
   .from { display: grid; gap: var(--space-2); }
   /* the name is the sender, so it is set a little smaller than the old greeting to fit "Vidyasagar." on one line */
@@ -85,7 +87,9 @@ import { site } from '../data/site';
 
   @media (max-width: 52rem) {
     /* like a real letter, the stamp and postmark sit top right, above the sender, not after all the text */
-    .sheet { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stamp" "message" "to"; padding: var(--space-5); gap: var(--space-5); }
+    .sheet { grid-template-columns: minmax(0, 1fr); grid-template-areas: "par" "stamp" "message" "to"; padding: var(--space-5); gap: var(--space-5); }
+    .par { display: block; grid-area: par; margin-bottom: calc(var(--space-3) * -1); }
+    .par-in { display: none; }
     .stamp-zone { justify-items: end; }
     .stamp-zone .st { width: min(46%, 8.5rem); }
   }

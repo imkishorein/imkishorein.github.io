@@ -21,11 +21,14 @@
 
 ## Mobile audit
 - [x] Home at 375px and 320px (see `DECISIONS.md`)
-- [ ] 320px: the wordmark touches the lantern cord
+- [x] 320px: wordmark and lantern no longer touch (smaller wordmark and logo below 23rem). The Typed wordmark is now small on phones.
 - [ ] Audit Notes, a note page, About, Stuff, and the coming-soon pages at phone width
 - [ ] Check dark mode on phones, and real devices (iPhone Safari for the overflow fix and the haptics, Android for vibration). Only tested in the browser emulator.
 - [ ] Haptics were never felt on a real phone. Tune the patterns by hand.
 - [ ] Hero stamp dip may be too subtle on touch (4px). Bigger if it reads weak.
+- [ ] Phone menu and footer were only checked in the emulator, light mode mostly. Check dark mode, a real iPhone (safe area under the postbox, home bar) and the tap targets of the lantern and speaker by thumb.
+- [ ] On phones the plane drifts slightly if you scroll while it flies (the postbox now scrolls with the page).
+- [ ] Seal hanko stamp positions are random in the left half of the page. Check they never cover something important.
 
 ## Decisions still open
 - [ ] Header wordmark: which of the six styles to keep (Marker, Brush, Neon, Stitched, Playful, Typed), or keep the random mix. Check them at phone width and in dark mode (only checked on desktop in light mode). Typed looks smaller than the others at the same header height.
