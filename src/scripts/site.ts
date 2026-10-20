@@ -266,18 +266,107 @@ document.querySelectorAll<HTMLElement>('[data-sound-hover]').forEach((el) => {
   });
 });
 
-/* ───────── stamp press: click the hero stamp to re-postmark ───────── */
-document.querySelectorAll<HTMLElement>('[data-stamp-press]').forEach((el) => {
-  const mark = el.querySelector<SVGElement>('.postmark');
-  const press = () => {
-    play('thunk');
-    if (reduceMotion()) return;
-    el.animate([{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(4px) rotate(-1deg)' }, { transform: 'translateY(0) rotate(0)' }], { duration: 260, easing: 'cubic-bezier(.5,0,.2,1.4)' });
-    mark?.animate([{ opacity: 0.2, transform: 'scale(1.18) rotate(-6deg)' }, { opacity: 1, transform: 'scale(1) rotate(0)' }], { duration: 380, easing: 'cubic-bezier(.2,.7,.2,1)' });
+/* ───────── hero: an old-school Japanese wooden-handled stamp for a cursor ─────────
+   A cursor image cannot animate, so on a mouse the real cursor is hidden and a stamp element follows the pointer.
+   Pressing anywhere on the hero lifts it, slams it down and leaves a ring of ink (a round 〒 seal) that stays
+   until the page is refreshed. On the hero stamp itself the re-postmark, dip and sound fire at impact. Touch and keyboard skip the cursor. */
+const STAMP_SVG = `<svg viewBox="0 0 40 76" aria-hidden="true" focusable="false">
+  <g class="halo"><path d="M11 15 C11 3 29 3 29 15 L27.4 45 L12.6 45 Z"/><rect x="11.4" y="45" width="17.2" height="6" rx="1.6"/><path d="M15.6 51 L24.4 51 L25 60 L15 60 Z"/><rect x="11" y="60" width="18" height="8" rx="2.4"/></g>
+  <path class="wood" d="M11 15 C11 3 29 3 29 15 L27.4 45 L12.6 45 Z"/>
+  <path class="grain" d="M16 8 C15.2 20 15.4 32 15.8 43 M20.4 5.4 C20.8 18 20.6 32 20.2 44 M24.6 8 C25.2 20 24.8 32 24.2 43"/>
+  <rect class="brass" x="11.4" y="45" width="17.2" height="6" rx="1.6"/>
+  <path class="grain" d="M12.4 48 L27.6 48" style="stroke:var(--pb-ink)"/>
+  <path class="wood" d="M15.6 51 L24.4 51 L25 60 L15 60 Z"/>
+  <rect class="die" x="11" y="60" width="18" height="8" rx="2.4"/>
+  <ellipse class="face" cx="20" cy="70" rx="10.4" ry="2.4"/>
+</svg>`;
+/* each stamp is a different traditional blessing (the kind on omamori charms, new year cards and shop signs): a kanji in a double ring with the English under it. A shuffled bag, so a wish only
+   repeats after all of them have been used and never twice in a row. */
+const WISHES: [string, string][] = [['福', 'Fortune'], ['幸', 'Happiness'], ['寿', 'Long life'], ['吉', 'Good omen'], ['開運', 'Good luck'], ['招福', 'Fortune comes'], ['繁栄', 'Prosperity'], ['平和', 'Peace']];
+let bag: [string, string][] = [];
+let lastWish = '';
+const nextWish = () => {
+  if (!bag.length) { bag = [...WISHES].sort(() => Math.random() - 0.5); if (bag[bag.length - 1][0] === lastWish) bag.reverse(); }
+  const w = bag.pop()!; lastWish = w[0]; return w;
+};
+/* The English is kept well inside the inner ring: a two word phrase is split over two lines, a long single word shrinks,
+   and the whole seal grows (64 to 104px) so the text always renders at a readable size (about 6px and up). */
+const sealFit = (word: string) => {
+  const lines = word.split(' '), n = Math.max(...lines.map((l) => l.length)), avail = lines.length > 1 ? 24 : 27;
+  const fs = Math.min(5.6, (avail - 0.4 * n) / (0.64 * n));
+  return { lines, fs, size: Math.min(104, Math.max(64, (6.4 * 56) / fs)) };
+};
+const sealSvg = ([kanji]: [string, string], fit: { lines: string[]; fs: number }) => {
+  const two = fit.lines.length > 1, long = kanji.length > 1;
+  const label = fit.lines.map((l, i) => `<text x="28" y="${two ? 37.6 + i * 6.2 : 41.6}" text-anchor="middle" fill="currentColor" style="font-family:var(--font-sans);font-weight:600;font-size:${fit.fs.toFixed(2)}px;letter-spacing:0.4px;text-transform:uppercase">${l}</text>`).join('');
+  return `<svg viewBox="0 0 56 56" aria-hidden="true" focusable="false">
+  <g fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="28" cy="28" r="25.4" stroke-width="2.6" stroke-dasharray="48 1.8 30 1.6 38 2"/><circle cx="28" cy="28" r="21.4" stroke-width="1"/></g>
+  <text x="28" y="${(two ? 28 : 31) + (long ? 0 : 1)}" text-anchor="middle" fill="currentColor" lang="ja" style="font-family:var(--font-jp);font-weight:700;font-size:${long ? 15 : 20}px">${kanji}</text>${label}
+</svg>`;
+};
+const canHover = matchMedia('(hover: hover) and (pointer: fine)');
+const hero = document.querySelector<HTMLElement>('.envelope');
+const heroStamp = hero?.querySelector<HTMLElement>('[data-stamp-press]');
+const mark = heroStamp?.querySelector<SVGElement>('.postmark');
+/* the hero stamp's own press: sound, a dip, and the postmark re-struck */
+const pressStamp = () => {
+  play('thunk');
+  if (reduceMotion() || !heroStamp) return;
+  heroStamp.animate([{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(4px) rotate(-1deg)' }, { transform: 'translateY(0) rotate(0)' }], { duration: 260, easing: 'cubic-bezier(.5,0,.2,1.4)' });
+  mark?.animate([{ opacity: 0.2, transform: 'scale(1.18) rotate(-6deg)' }, { opacity: 1, transform: 'scale(1) rotate(0)' }], { duration: 380, easing: 'cubic-bezier(.2,.7,.2,1)' });
+};
+let struck = false; // a mouse press already handled by the cursor stamp, so the click that follows is ignored
+if (hero && canHover.matches) {
+  const cur = document.createElement('div'); cur.className = 'stamp-cursor'; cur.innerHTML = STAMP_SVG; document.body.append(cur);
+  const art = cur.querySelector('svg') as SVGElement;
+  let px = 0, py = 0, shown = false, raf = 0;
+  const place = () => { raf = 0; cur.style.transform = `translate(${px - 20}px, ${py - 72}px)`; };
+  const move = (e: PointerEvent) => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(place); };
+  /* a casual nudge so people know a click stamps: until the first stamp, a small speech bubble pops up beside the cursor
+     after a short hover and the stamp wiggles. It comes back (with the next line) every time they return without clicking, until the first stamp. */
+  const HINTS = ['Psst. Click to stamp.', 'Go on. Nothing bad will happen.', 'Still here? Click already.'];
+  const hint = document.createElement('span'); hint.className = 'stamp-hint'; hint.setAttribute('aria-hidden', 'true'); cur.append(hint);
+  let stamped = false, hintTimer = 0, hintsShown = 0;
+  const showHint = () => {
+    if (stamped || !shown) return;
+    hint.textContent = HINTS[hintsShown++ % HINTS.length];
+    cur.classList.toggle('flip', px > innerWidth - 260); hint.classList.add('show');
+    if (!reduceMotion()) art.animate([{ transform: 'rotate(6deg)' }, { transform: 'rotate(-10deg) translateY(-3px)' }, { transform: 'rotate(12deg)' }, { transform: 'rotate(-6deg) translateY(-2px)' }, { transform: 'rotate(6deg)' }], { duration: 700, easing: 'ease-in-out' });
   };
-  el.addEventListener('click', (e) => { if (!(e as MouseEvent).shiftKey) press(); }); // shift-click is the hanko
-  el.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); press(); } });
-});
+  const hideHint = () => { clearTimeout(hintTimer); hint.classList.remove('show'); };
+  const show = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; shown = true; hero.classList.add('has-stamp-cursor'); move(e); cur.classList.add('on'); if (!stamped) { clearTimeout(hintTimer); hintTimer = window.setTimeout(showHint, 700); } };
+  const hide = () => { shown = false; hero.classList.remove('has-stamp-cursor'); cur.classList.remove('on'); hideHint(); };
+  hero.addEventListener('pointerenter', show);
+  hero.addEventListener('pointermove', (e) => { if (!shown) show(e); else move(e); });
+  hero.addEventListener('pointerleave', hide);
+  /* press anywhere on the hero: lift, slam, and the ink stays where it landed until the page is refreshed */
+  hero.addEventListener('pointerdown', (e) => {
+    struck = false; if (!shown || e.pointerType !== 'mouse' || e.button !== 0 || e.shiftKey) return; // shift-click is the hanko
+    struck = true; stamped = true; hideHint();
+    const x = e.clientX, y = e.clientY, onStamp = !!heroStamp?.contains(e.target as Node);
+    const still = reduceMotion(), time = 420, impact = still ? 0 : 0.4 * time;
+    if (!still) art.animate([
+      { transform: 'translateY(0) rotate(6deg)', offset: 0 },
+      { transform: 'translateY(-15px) rotate(-3deg) scale(1.04)', offset: 0.18, easing: 'cubic-bezier(.5,0,1,.6)' },
+      { transform: 'translateY(3px) rotate(0deg) scale(1, .92)', offset: 0.4 },
+      { transform: 'translateY(0.5px) rotate(0deg) scale(1, .97)', offset: 0.55 },
+      { transform: 'translateY(0) rotate(6deg)', offset: 1 },
+    ], { duration: time, easing: 'ease-out' });
+    setTimeout(() => { // the stamp lands
+      if (onStamp) pressStamp(); else play('thunk');
+      const r = hero.getBoundingClientRect(), seal = document.createElement('div');
+      const wish = nextWish(), fit = sealFit(wish[1]);
+      seal.className = 'stamp-impression'; seal.innerHTML = sealSvg(wish, fit);
+      seal.style.width = seal.style.height = `${fit.size}px`; seal.style.margin = `${-fit.size / 2}px 0 0 ${-fit.size / 2}px`;
+      seal.style.left = `${x - r.left}px`; seal.style.top = `${y - r.top}px`; seal.style.transform = `rotate(${(Math.random() * 16 - 8).toFixed(1)}deg)`;
+      seal.style.opacity = String(0.8 + Math.random() * 0.15); hero.append(seal);
+      if (!still) seal.animate([{ scale: '1.14', opacity: 0 }, { scale: '1', offset: 0.35 }], { duration: 220, easing: 'ease-out' });
+    }, impact);
+  });
+}
+/* touch and keyboard: no cursor, so the hero stamp presses at once */
+heroStamp?.addEventListener('click', (e) => { if ((e as MouseEvent).shiftKey) return; if (struck) { struck = false; return; } pressStamp(); }); // shift-click is the hanko
+heroStamp?.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); pressStamp(); } });
 
 /* ───────── hidden: shift-click leaves a hanko mark ───────── */
 document.addEventListener('click', (e) => {

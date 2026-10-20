@@ -164,3 +164,21 @@ html[data-vt="to-light"]::view-transition-new(root) { z-index: 2; }
 html[data-vt="to-light"]::view-transition-old(root) { z-index: 1; }
 html[data-vt="to-dark"]::view-transition-old(root) { z-index: 2; }
 html[data-vt="to-dark"]::view-transition-new(root) { z-index: 1; }
+
+/* Old-school stamp cursor over the hero (built in site.ts). The real cursor is hidden while it is on, mouse only. */
+.has-stamp-cursor, .has-stamp-cursor * { cursor: none !important; user-select: none; }
+.stamp-cursor { position: fixed; left: 0; top: 0; z-index: 60; width: 40px; height: 76px; pointer-events: none; opacity: 0; will-change: transform; }
+.stamp-cursor.on { opacity: 1; }
+.stamp-hint { position: absolute; left: 40px; top: 6px; white-space: nowrap; padding: 0.25rem 0.55rem; background: var(--color-surface); color: var(--color-text); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.02em; opacity: 0; transform: translateY(4px) scale(0.96); transition: opacity 160ms, transform 220ms var(--ease-press); }
+.stamp-hint.show { opacity: 1; transform: none; }
+.stamp-cursor.flip .stamp-hint { left: auto; right: 40px; }
+.stamp-cursor svg { display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 20px 72px; transform: rotate(6deg); filter: drop-shadow(0 3px 3px color-mix(in oklab, var(--color-shadow) 40%, transparent)); }
+.stamp-cursor .halo { fill: var(--pb-paper); stroke: var(--pb-paper); stroke-width: 3.4; stroke-linejoin: round; }
+.stamp-cursor .wood { fill: var(--pb-ink); }
+.stamp-cursor .grain { fill: none; stroke: var(--pb-trim); stroke-width: 0.7; stroke-linecap: round; opacity: 0.55; }
+.stamp-cursor .brass { fill: var(--pb-trim); stroke: var(--pb-ink); stroke-width: 0.9; }
+.stamp-cursor .die { fill: var(--pb-ink); }
+.stamp-cursor .face { fill: var(--color-text); }
+.stamp-impression { position: absolute; z-index: 5; width: 64px; height: 64px; margin: -32px 0 0 -32px; pointer-events: none; color: var(--color-text); mix-blend-mode: multiply; }
+:root[data-theme="dark"] .stamp-impression { mix-blend-mode: screen; }
+.stamp-impression svg { width: 100%; height: 100%; overflow: visible; }
