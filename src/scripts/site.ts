@@ -76,6 +76,9 @@ const audio = (gesture: boolean) => {
   if (ctx.state === 'suspended' && gesture) void ctx.resume();
   return gesture || ctx.state === 'running' ? ctx : null;
 };
+/* Browsers only let audio start after a user gesture. Unlock it on the first press, tap or key anywhere (silently),
+   so sounds with no gesture of their own (the postbox paper plane) work whenever sound is on, also after a page load. */
+['pointerdown', 'keydown', 'touchend'].forEach((ev) => addEventListener(ev, () => { audio(true); }, { passive: true }));
 const noise = (c: AudioContext, seconds: number, at: number) => {
   if (!noiseBuf) { // one shared second of white noise, built once
     noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
@@ -86,7 +89,7 @@ const noise = (c: AudioContext, seconds: number, at: number) => {
   src.start(at, Math.random() * (1 - seconds), seconds);
   return src;
 };
-type Sound = 'tick' | 'switch' | 'thunk' | 'rustle' | 'on';
+type Sound = 'tick' | 'switch' | 'thunk' | 'rustle' | 'whoosh' | 'bonk' | 'ping' | 'on';
 function play(kind: Sound, hover = false) {
   if (!soundOn) return;
   const c = audio(!hover); if (!c || !bus) return;
@@ -122,6 +125,24 @@ function play(kind: Sound, hover = false) {
     f.type = 'bandpass'; f.frequency.value = 5200 * j; f.Q.value = 0.7;
     env(g, v * 0.45, 0.14, 0.05);
     n.connect(f).connect(g).connect(bus);
+  } else if (kind === 'whoosh') { // a soft airy swish as the paper plane leaves the postbox
+    const n = noise(c, 0.7, t), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = 'bandpass'; f.Q.value = 0.9;
+    f.frequency.setValueAtTime(700 * j, t); f.frequency.exponentialRampToValueAtTime(3200 * j, t + 0.6);
+    env(g, v * 0.5, 0.7, 0.18);
+    n.connect(f).connect(g).connect(bus);
+  } else if (kind === 'ping') { // an in-chat message pop, in the spirit of a chat app: two quick soft sine blips, the second higher
+    [[1046, 0, 0.09], [1568, 0.075, 0.16]].forEach(([hz, d, dur]) => {
+      const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = hz * j;
+      env(g, v * 1.1, dur, 0.006, t + d);
+      o.connect(g).connect(bus!); o.start(t + d); o.stop(t + d + dur + 0.03);
+    });
+  } else if (kind === 'bonk') { // a paper plane tapping into something: short, dull and light
+    const o = c.createOscillator(), g = c.createGain(); o.type = 'triangle';
+    o.frequency.setValueAtTime(260 * j, t); o.frequency.exponentialRampToValueAtTime(120 * j, t + 0.08);
+    env(g, v * 0.9, 0.1, 0.002);
+    o.connect(g).connect(bus); o.start(t); o.stop(t + 0.12);
+    click(1800, v * 0.5, 0.025, t);
   } else { // soft two-note confirmation: sound switched on
     [660, 990].forEach((hz, i) => {
       const o = c.createOscillator(), g = c.createGain(); o.type = 'triangle'; o.frequency.value = hz;
@@ -130,6 +151,66 @@ function play(kind: Sound, hover = false) {
     });
   }
 }
+
+/* The postbox paper plane (Postbox.astro). Every 30s it is tossed out of the slot, swoops up and over, and flies at a
+   random piece of the page (a line of text, a stamp, a heading...). It taps into it, the target gives a tiny shake,
+   the plane bounces back, tumbles and falls. Everything is built from the live layout, so it never hits a fixed spot.
+   Sounds only play when sound is on and audio is already running. Skipped under reduced motion. */
+const plane = document.querySelector<SVGElement>('.postbox .plane');
+const still = matchMedia('(prefers-reduced-motion: reduce)');
+const HITTABLE = 'main h1, main h2, main h3, main p, main li, main a, main img, .stamp, .pm';
+function pickTarget(ox: number, oy: number) {
+  const hits: { x: number; y: number; el: HTMLElement }[] = [];
+  document.querySelectorAll<HTMLElement>(HITTABLE).forEach((el) => {
+    if (el.closest('.postbox, nav, header, footer')) return;
+    const r = document.createRange(); r.selectNodeContents(el);
+    const rects = el.matches('img, .stamp, .pm') ? [el.getBoundingClientRect()] : [...r.getClientRects()];
+    rects.forEach((q) => { // a visible line of text or box, clear of the top bar and left of the postbox
+      if (q.width < 24 || q.height < 10 || q.top < 70 || q.bottom > oy - 30 || q.right > ox - 40 || q.right < 40) return;
+      hits.push({ x: q.right, y: q.top + q.height * (0.25 + Math.random() * 0.5), el });
+    });
+  });
+  return hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
+}
+function launchPlane() {
+  const origin = plane?.parentElement?.getBoundingClientRect();
+  if (!plane || !origin || document.hidden || still.matches) return;
+  const ox = origin.x, oy = origin.y, rnd = (a: number, b: number) => a + Math.random() * (b - a);
+  const hit = pickTarget(ox, oy); if (!hit) return;
+  const tx = hit.x - ox + 16, ty = hit.y - oy;                              // plane centre at impact, relative to the slot
+  const p1 = { x: tx * 0.1 - 20, y: Math.min(ty, 0) - rnd(60, 200) };       // climb out of the slot first
+  const p2 = { x: tx + rnd(120, 260), y: ty + rnd(-70, 40) };               // then come in at the target from the right
+  const flight = Math.min(5200, 2600 + Math.hypot(tx, ty) * 3), N = 30;
+  const bounce = 260, fall = 1100, total = flight + bounce + fall;
+  const kf: Keyframe[] = []; let prev = 0, endRot = 0;
+  for (let i = 0; i <= N; i++) {
+    const u = i / N, p = 1 - Math.pow(1 - u, 1.4), q = 1 - p;               // quick toss, slower glide
+    const x = 3 * q * q * p * p1.x + 3 * q * p * p * p2.x + p * p * p * tx;
+    const y = 3 * q * q * p * p1.y + 3 * q * p * p * p2.y + p * p * p * ty;
+    const dx = 3 * (q * q * p1.x + 2 * q * p * (p2.x - p1.x) + p * p * (tx - p2.x));
+    const dy = 3 * (q * q * p1.y + 2 * q * p * (p2.y - p1.y) + p * p * (ty - p2.y));
+    let rot = Math.atan2(dy, dx) * 180 / Math.PI - 180;                     // the drawing's nose points left
+    while (rot - prev > 180) rot -= 360; while (rot - prev < -180) rot += 360; prev = rot;
+    const r = rot + Math.sin(u * Math.PI * 4) * 3 * (1 - u); endRot = rot;
+    const scale = 0.35 + 0.95 * Math.min(u / 0.12, 1);
+    kf.push({ offset: (u * flight) / total, opacity: Math.min(u / 0.04, 1), transform: `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${r.toFixed(1)}deg) scale(${scale.toFixed(2)})` });
+  }
+  const at = (dx: number, dy: number, rot: number, opacity: number, ms: number, easing = 'linear'): Keyframe =>
+    ({ offset: ms / total, opacity, easing, transform: `translate(${(tx + dx).toFixed(1)}px, ${(ty + dy).toFixed(1)}px) rotate(${(endRot + rot).toFixed(1)}deg) scale(1.3)` });
+  const drift = rnd(10, 40), spin = rnd(140, 260) * (Math.random() < 0.5 ? -1 : 1), drop = rnd(180, 320);
+  kf.push(at(14, -8, -32, 1, flight + bounce, 'cubic-bezier(0.55, 0, 1, 0.6)'));              // knocked back, then gravity
+  kf.push(at(14 + drift * 0.5, drop * 0.55, spin * 0.5, 1, flight + bounce + fall * 0.65));
+  kf.push(at(14 + drift, drop, spin, 0, total));
+  plane.animate(kf, { duration: total, easing: 'linear' });
+  play('whoosh', true);
+  setTimeout(() => { // the hit: a tap sound and a tiny shake of whatever it landed on (individual properties, so existing transforms survive)
+    play('bonk', true);
+    if (getComputedStyle(hit.el).display !== 'inline') hit.el.animate(
+      [{ translate: '0 0', rotate: '0deg' }, { translate: '-3px 1px', rotate: '-0.25deg', offset: 0.3 }, { translate: '2px 0', rotate: '0.15deg', offset: 0.6 }, { translate: '0 0', rotate: '0deg' }],
+      { duration: 320, easing: 'ease-out' });
+  }, flight);
+}
+setTimeout(() => { launchPlane(); setInterval(launchPlane, 30000); }, 3000);
 
 const soundBtn = document.querySelector<HTMLButtonElement>('[data-sound-toggle]');
 const soundState = document.querySelector<HTMLElement>('[data-sound-state]');
