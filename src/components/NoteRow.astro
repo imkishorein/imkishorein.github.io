@@ -14,7 +14,9 @@ const yr = d.getUTCFullYear();
     <h3 class="title display"><a href={`/notes/${note.id}/`} data-sound="tick">{note.data.title}</a></h3>
     <p class="muted">{note.data.summary}</p>
   </div>
-  <p class="meta label muted">{note.data.category}{note.data.placeholder && <span class="ph"> · placeholder</span>}</p>
+  <ul class="badges" aria-label="Tags">
+    {note.data.tags.map((t, i) => <li class={`badge b${i + 1}`}>{t}</li>)}
+  </ul>
 </li>
 <style>
   .note { grid-template-columns: 8rem 1fr auto; align-items: center; }
@@ -24,5 +26,10 @@ const yr = d.getUTCFullYear();
   .note { position: relative; }
   .title a:hover { text-decoration: underline; text-decoration-thickness: var(--border); text-underline-offset: 0.2em; }
   .text { display: grid; gap: var(--space-1); }
-  @media (max-width: 40rem) { .note { align-items: start; grid-template-columns: 6rem 1fr; gap: var(--space-2) var(--space-4); } .meta { grid-column: 2; } }
+  .badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); list-style: none; margin: 0; padding: 0; max-width: 24rem; }
+  .badge { font-family: var(--font-mono); font-size: var(--step--2); letter-spacing: 0.04em; line-height: 1; white-space: nowrap; padding: 0.4em 0.8em 0.45em; border-radius: 999px; border: var(--border) solid; }
+  .b1 { background: var(--badge-1-bg); color: var(--badge-1-ink); border-color: var(--badge-1-edge); }
+  .b2 { background: var(--badge-2-bg); color: var(--badge-2-ink); border-color: var(--badge-2-edge); }
+  .b3 { background: var(--badge-3-bg); color: var(--badge-3-ink); border-color: var(--badge-3-edge); }
+  @media (max-width: 40rem) { .note { align-items: start; grid-template-columns: 6rem 1fr; gap: var(--space-2) var(--space-4); } .badges { grid-column: 2; justify-content: flex-start; max-width: none; } }
 </style>

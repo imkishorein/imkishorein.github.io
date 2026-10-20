@@ -2,6 +2,7 @@
 title: Why this site is a postcard
 date: 2026-10-20
 category: Design
+tags: [Design, Craft, Behind the site]
 summary: The idea, the look and the small details behind imkishore.in, and why I built it as a letter and not a template.
 placeholder: true
 ---
@@ -44,7 +45,7 @@ I can feel the difference even if I cannot always point to it. Perfect lines loo
 
 ## The stamp and the portrait
 
-The stamp in the corner is an illustrated portrait of me. My first attempt copied a single photo and it did not look like me, so I rebuilt it from front-facing photos instead: side-swept hair, round glasses, a light moustache and a small goatee. It is a likeness, not a trace.
+The stamp in the corner is an illustrated portrait of me.
 
 The stamp has perforated edges and a dark band at the bottom for the caption. In dark mode the stamp changes colour with the page, so the postmark ink stays readable where it crosses it.
 

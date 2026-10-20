@@ -2,6 +2,7 @@
 title: Welcome to the notes
 date: 2026-10-19
 category: Life
+tags: [Intro, Life]
 summary: What goes in this section and what does not.
 placeholder: true
 ---

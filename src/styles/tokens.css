@@ -41,6 +41,16 @@
   --color-focus:         light-dark(var(--palette-olive), var(--palette-sage));
   --color-selection:     color-mix(in oklab, var(--palette-sage) 70%, transparent);
   --color-shadow:        light-dark(color-mix(in oklab, var(--palette-olive) 45%, transparent), color-mix(in oklab, black 55%, transparent));
+  /* Note badges: three tones, each a slight hue turn of the palette (bg, ink, edge). */
+  --badge-1-bg:   light-dark(color-mix(in oklab, var(--palette-sage) 55%, var(--palette-paper)), color-mix(in oklab, var(--palette-sage) 30%, var(--palette-olive)));
+  --badge-1-ink:  light-dark(var(--palette-olive), var(--palette-paper));
+  --badge-1-edge: light-dark(color-mix(in oklab, var(--palette-sage) 80%, var(--palette-olive)), color-mix(in oklab, var(--palette-sage) 60%, var(--palette-olive)));
+  --badge-2-bg:   light-dark(oklch(from color-mix(in oklab, var(--palette-sage) 40%, var(--palette-paper)) l c calc(h + 55)), oklch(from color-mix(in oklab, var(--palette-sage) 26%, var(--palette-olive)) l c calc(h + 55)));
+  --badge-2-ink:  light-dark(var(--palette-olive), var(--palette-paper));
+  --badge-2-edge: light-dark(oklch(from color-mix(in oklab, var(--palette-sage) 60%, var(--palette-olive)) l c calc(h + 55)), oklch(from color-mix(in oklab, var(--palette-sage) 50%, var(--palette-olive)) l c calc(h + 55)));
+  --badge-3-bg:   light-dark(oklch(from color-mix(in oklab, var(--palette-sage) 40%, var(--palette-paper)) l c calc(h - 70)), oklch(from color-mix(in oklab, var(--palette-sage) 26%, var(--palette-olive)) l c calc(h - 70)));
+  --badge-3-ink:  light-dark(var(--palette-olive), var(--palette-paper));
+  --badge-3-edge: light-dark(oklch(from color-mix(in oklab, var(--palette-sage) 60%, var(--palette-olive)) l c calc(h - 70)), oklch(from color-mix(in oklab, var(--palette-sage) 50%, var(--palette-olive)) l c calc(h - 70)));
 
   /* Illustration colours for stamps. Fixed on purpose: a stamp is a physical object,
      so its art does not flip with light or dark mode. */
