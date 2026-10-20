@@ -5,7 +5,6 @@
 // date and the time in Bengaluru. The small "here" note is the weather. Both are filled in by
 // src/scripts/live.ts. Without JS the postmark shows placeholders and the weather note stays hidden.
 import Stamp from './Stamp.astro';
-import PortraitArt from './PortraitArt.astro';
 import Postmark from './Postmark.astro';
 import PinBoxes from './PinBoxes.astro';
 import WeatherIcon from './WeatherIcon.astro';
@@ -42,7 +41,7 @@ import { site } from '../data/site';
 
     <div class="stamp-zone" data-stamp-press tabindex="0" role="button" aria-label="Press the stamp">
       <div class="pm"><Postmark id="pm-hero" /></div>
-      <div class="st"><Stamp caption="Hello" value="2026"><PortraitArt /></Stamp></div>
+      <div class="st"><Stamp src="/kishore-avatar.png" alt="Illustrated portrait of Kishore" /></div>
     </div>
 
     <aside class="to" aria-label={`To: ${site.addressee}`}>
@@ -56,19 +55,19 @@ import { site } from '../data/site';
 </article>
 <style>
   .filters { position: absolute; }
-  .envelope { position: relative; padding: var(--airmail-width); border-radius: var(--radius-1); box-shadow: var(--shadow-card); }
+  .envelope { position: relative; padding: var(--airmail-width); border-radius: var(--radius-3); box-shadow: var(--shadow-card); }
   /* the stripes live on a layer of their own so the rough filter bends the border and not the content */
-  .envelope::before { content: ""; position: absolute; inset: 0; background: var(--airmail-stripes); filter: url(#env-rough); pointer-events: none; }
+  .envelope::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--airmail-stripes); filter: url(#env-rough); pointer-events: none; }
   /* Message on the left spans two rows, so nothing is pushed down by the stamp. */
   .sheet {
     display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     grid-template-areas: "message stamp" "message to";
     gap: var(--space-4) var(--space-7);
     padding: var(--space-5) var(--space-6) var(--space-6);
-    position: relative; background: var(--color-surface);
+    position: relative; background: var(--color-surface); border-radius: calc(var(--radius-3) * 0.45);
   }
   /* inner edge drawn as a slightly wobbly line instead of a perfect border */
-  .sheet::after { content: ""; position: absolute; inset: 0; border: 1.5px solid var(--color-line-strong); filter: url(#env-line); pointer-events: none; }
+  .sheet::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 1.5px solid var(--color-line-strong); filter: url(#env-line); pointer-events: none; }
   .message { grid-area: message; display: flex; flex-direction: column; gap: var(--space-4); align-self: start; }
   .from { display: grid; gap: var(--space-2); }
   /* the name is the sender, so it is set a little smaller than the old greeting to fit "Vidyasagar." on one line */

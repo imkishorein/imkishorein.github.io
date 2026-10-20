@@ -89,7 +89,7 @@ const noise = (c: AudioContext, seconds: number, at: number) => {
   src.start(at, Math.random() * (1 - seconds), seconds);
   return src;
 };
-type Sound = 'tick' | 'switch' | 'thunk' | 'rustle' | 'whoosh' | 'bonk' | 'ping' | 'on';
+type Sound = 'tick' | 'switch' | 'thunk' | 'rustle' | 'whoosh' | 'bonk' | 'ping' | 'pad' | 'on';
 function play(kind: Sound, hover = false) {
   if (!soundOn) return;
   const c = audio(!hover); if (!c || !bus) return;
@@ -131,6 +131,15 @@ function play(kind: Sound, hover = false) {
     f.frequency.setValueAtTime(700 * j, t); f.frequency.exponentialRampToValueAtTime(3200 * j, t + 0.6);
     env(g, v * 0.5, 0.7, 0.18);
     n.connect(f).connect(g).connect(bus);
+  } else if (kind === 'pad') { // a soft pat on an ink pad as the stamp is picked up: hover on the hero
+    const o = c.createOscillator(), g = c.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(330 * j, t); o.frequency.exponentialRampToValueAtTime(190 * j, t + 0.09);
+    env(g, v * 0.7, 0.11, 0.004);
+    o.connect(g).connect(bus); o.start(t); o.stop(t + 0.13);
+    const n = noise(c, 0.04, t), f = c.createBiquadFilter(), ng = c.createGain();
+    f.type = 'lowpass'; f.frequency.value = 1100;
+    env(ng, v * 0.35, 0.04, 0.002);
+    n.connect(f).connect(ng).connect(bus);
   } else if (kind === 'ping') { // an in-chat message pop, in the spirit of a chat app: two quick soft sine blips, the second higher
     [[1046, 0, 0.09], [1568, 0.075, 0.16]].forEach(([hz, d, dur]) => {
       const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = hz * j;
@@ -334,7 +343,7 @@ if (hero && canHover.matches) {
     if (!reduceMotion()) art.animate([{ transform: 'rotate(6deg)' }, { transform: 'rotate(-10deg) translateY(-3px)' }, { transform: 'rotate(12deg)' }, { transform: 'rotate(-6deg) translateY(-2px)' }, { transform: 'rotate(6deg)' }], { duration: 700, easing: 'ease-in-out' });
   };
   const hideHint = () => { clearTimeout(hintTimer); hint.classList.remove('show'); };
-  const show = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; shown = true; hero.classList.add('has-stamp-cursor'); move(e); cur.classList.add('on'); if (!stamped) { clearTimeout(hintTimer); hintTimer = window.setTimeout(showHint, 700); } };
+  const show = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; shown = true; hero.classList.add('has-stamp-cursor'); move(e); cur.classList.add('on'); play('pad', true); if (!stamped) { clearTimeout(hintTimer); hintTimer = window.setTimeout(showHint, 700); } };
   const hide = () => { shown = false; hero.classList.remove('has-stamp-cursor'); cur.classList.remove('on'); hideHint(); };
   hero.addEventListener('pointerenter', show);
   hero.addEventListener('pointermove', (e) => { if (!shown) show(e); else move(e); });

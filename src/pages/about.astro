@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import Stamp from '../components/Stamp.astro';
-import PortraitArt from '../components/PortraitArt.astro';
 import DateStamp from '../components/DateStamp.astro';
 import { site, timeline, community, howIWork } from '../data/site';
 // "2022 to 2025" becomes a stamp reading 2022, a short line, then 2025. A single year just shows the year.
@@ -17,7 +16,7 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
       <p>Before design was the job, I built things. I co-founded a startup during engineering college and bootstrapped it into a revenue-generating company, then moved through UI development into product design. That mix is why I am comfortable both drawing the screen and talking to the engineer who ships it.</p>
       <p>Outside work I lead the Friends of Figma Bangalore community, mentoring designers and hosting events that connect the design ecosystem.</p>
     </div>
-    <Stamp class="portrait" caption="Kishore" value="2026"><PortraitArt /></Stamp>
+    <Stamp class="portrait" src="/kishore-avatar.png" alt="Illustrated portrait of Kishore" />
   </section>
 
   <section class="wrap block">

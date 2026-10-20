@@ -48,6 +48,21 @@
   --art-mid:   var(--palette-sage);
   --art-light: var(--palette-paper);
 
+  /* Portrait stamp (Stamp.astro). Everything except the portrait follows light and dark mode, including the panel,
+     halo and scenery behind the cut-out portrait.
+     Light: pale sage paper, a mid green panel with a light halo, a dark olive band, a fine olive edge.
+     Dark: deep olive paper, a dark green panel with a dim halo, a lifted olive band, a faint light edge, so the light
+     postmark ink stays readable where it crosses the stamp. */
+  --stamp-paper:       light-dark(color-mix(in oklab, var(--palette-paper) 62%, var(--palette-sage)), color-mix(in oklab, var(--palette-sage) 36%, var(--palette-olive)));
+  --stamp-edge:        light-dark(color-mix(in oklab, var(--palette-olive) 55%, transparent), color-mix(in oklab, var(--palette-paper) 50%, transparent));
+  --stamp-panel:       light-dark(color-mix(in oklab, var(--palette-sage) 62%, var(--palette-olive)), color-mix(in oklab, var(--palette-olive) 78%, var(--palette-sage)));
+  --stamp-halo:        light-dark(color-mix(in oklab, var(--palette-sage) 72%, var(--palette-paper)), color-mix(in oklab, var(--palette-olive) 52%, var(--palette-sage)));
+  --stamp-band:        light-dark(var(--palette-olive), color-mix(in oklab, var(--palette-olive) 88%, black));
+  --stamp-ink:         var(--palette-paper);   /* lettering and lines */
+  --stamp-scene:       light-dark(var(--palette-olive), var(--palette-sage));   /* cloud, mountains and leaf: one colour that stands out on both the halo and the panel (deep olive in light mode, sage in dark mode) */
+  --stamp-detail:      light-dark(color-mix(in oklab, var(--palette-olive) 52%, var(--palette-sage)), var(--palette-sage));  /* mountains in the placeholder landscape */
+  --stamp-band-detail: var(--palette-sage);    /* the little sun and mountain in the band */
+
   /* Postbox (corner postbox, plinth and grass). Own roles because a plain ink-on-paper flip turns it into an
      X-ray in dark mode: here the box stays a deep green object with sage trim, the stone and grass shift to match. */
   --pb-ink:        light-dark(var(--palette-olive), color-mix(in oklab, var(--palette-olive) 90%, var(--palette-sage)));
@@ -108,6 +123,7 @@
   /* ───────── 3. SHAPE ───────── */
   --radius-1: 2px;
   --radius-2: 6px;
+  --radius-3: 20px;            /* the postcard envelope */
   --border:   1px;
 
   /* stamp perforation */
