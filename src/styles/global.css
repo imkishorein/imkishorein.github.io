@@ -75,6 +75,8 @@ main { flex: 1; }
 
 /* ───────── page header ───────── */
 .page-head { padding-block: var(--space-8) var(--space-7); display: grid; gap: var(--space-4); }
+/* phones: the title block is shorter, so the content starts higher on a small screen */
+@media (max-width: 40rem) { .page-head { padding-block: var(--space-6) var(--space-5); gap: var(--space-3); } }
 .page-head .kicker { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--color-text-muted); }
 .page-head .kicker::after { width: 3rem; }
 

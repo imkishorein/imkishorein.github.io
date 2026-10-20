@@ -169,3 +169,19 @@ Why: Kishore found the pinned box a distraction while reading on a small screen,
 ### 2026-10-20: Footer on phones is contact, postbox and seal; the colophon is hidden
 Replaces the phone footer layout. Say hello (email and links), a dashed rule, then one row with the seal at the left edge and the postbox at the right edge on the same ground line at the bottom of the page. "Last updated" and the shift-click hint are hidden on phones (no Shift on touch, and the line added noise). The 印 seal is now a button on every device: tap or Enter leaves a hanko somewhere above it, in the left half of the page so it never lands on the postbox, with the thunk and the stamp haptic. Shift-click anywhere still leaves one at the pointer. Desktop footer is unchanged.
 Why: Kishore asked whether the footer hierarchy made sense. Contact and the postbox belong together, the colophon is the least important line, and the seal needed a job on touch.
+
+### 2026-10-20: Phone page headers are shorter, and note rows line up with their stamp
+Below 40rem the shared `.page-head` (Notes, About, Stuff, coming-soon pages) has about 32px of padding above and 24px below, and tighter gaps, instead of 72px and 48px. Note rows align to the top, so the date stamp lines up with the title instead of floating beside a long summary.
+Why: the Notes page audit found the title block wasted a third of the first screen on a phone.
+
+### 2026-10-20: On phones a note puts the postmark and date stamp at the top, and the rest follows the message
+Below 52rem the postcard's right column is taken apart: the "航空便 · Par avion" label, postmark (read time) and date stamp move to the top of the card, like the stamp on the front of a postcard and like the home hero. Reactions and "More notes" follow the message under a hand-drawn dashed rule. The pinned column, vertical divider and bottom contents list are for desktop only. Nothing is shown twice.
+Why: read time and date are things you want before you start reading. At the bottom of a note they were decoration. Kishore asked whether the placement made sense, and chose the stamp row at the top.
+
+### 2026-10-20: Phone contents for a note: an inline row, then a sticky bar with arrows
+Replaces the pinned column's contents list on phones. A collapsible "In this note" row sits under the summary (44px rows). Once it scrolls away, a slim bar stays under the top stripe for as long as you are in the message, and goes before the signature: previous and next arrows (one section per tap, greyed at the ends), the current section as "03 · Title", and a +/− that opens the full list. The bar's label changes as a heading passes just under it; the desktop column changes a third of the way down. Section links land 88px from the top so the bar never covers them. The list closes on choosing an entry, Escape or a tap outside. An earlier version that showed only on scroll up was replaced because it hid the control when you needed it. Only notes with three or more `##` headings get a contents list.
+Why: on a long note the contents sat at the bottom where it could not help. Kishore wanted to jump to the previous or next section at any time, so the bar is always visible while reading.
+
+### 2026-10-20: Note page phone details
+The copy-link button is 32px, the size of the title line, with an invisible halo that makes its tap area about 44px. Contents rows and "More notes" rows are at least 44px tall. Card padding is smaller on phones (a 311px text column at 375px). Haptics wait for the first tap, because Chrome blocks and logs an error for a vibration before one.
+Why: a 44px button looked bigger than the title, and the plane's early vibration filled the Android console with errors.

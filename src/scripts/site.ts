@@ -100,7 +100,7 @@ const HAPTICS = { stamp: [14, 55, 34], launch: [10], hit: [22] } as const; // st
 function haptic(pattern: readonly number[]) {
   if (!coarse.matches || reduceMotion()) return;
   try {
-    if (navigator.vibrate) { navigator.vibrate(pattern as number[]); return; }
+    if (navigator.vibrate) { if (navigator.userActivation?.hasBeenActive !== false) navigator.vibrate(pattern as number[]); return; } // Chrome blocks (and logs an error for) a vibration before the first tap
     if (!tickLabel) {
       tickLabel = document.createElement('label'); tickLabel.setAttribute('aria-hidden', 'true');
       tickLabel.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';

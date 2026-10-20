@@ -22,7 +22,10 @@
 ## Mobile audit
 - [x] Home at 375px and 320px (see `DECISIONS.md`)
 - [x] 320px: wordmark and lantern no longer touch (smaller wordmark and logo below 23rem). The Typed wordmark is now small on phones.
-- [ ] Audit Notes, a note page, About, Stuff, and the coming-soon pages at phone width
+- [x] Notes page and note pages (see `DECISIONS.md`)
+- [ ] Audit About, Stuff, and the coming-soon pages at phone width
+- [ ] Note page: try the sticky contents bar by finger on a real phone (arrow taps, how much it crowds the top, iOS rubber-band scrolling). Only tested with simulated scroll events.
+- [ ] Note page: check the new stamp row at the top in dark mode
 - [ ] Check dark mode on phones, and real devices (iPhone Safari for the overflow fix and the haptics, Android for vibration). Only tested in the browser emulator.
 - [ ] Haptics were never felt on a real phone. Tune the patterns by hand.
 - [ ] Hero stamp dip may be too subtle on touch (4px). Bigger if it reads weak.

@@ -32,6 +32,20 @@ const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month:
   <article class="wrap note">
     <div id="note-top" class="postcard">
       <div class="edge edge-top" aria-hidden="true"></div>
+      {/* phones: a slim contents bar that stays under the top stripe while you are in the message (see the script). Zero height, so it takes no room in the card.
+          Previous and next arrows jump one section; the middle opens the full list. */}
+      {sections.length >= 3 && (
+        <div class="tocbar" data-tocbar>
+          <div class="toc toc-bar">
+            <div class="tb-row">
+              <button type="button" class="tb-step" data-step="-1" aria-label="Previous section" data-sound="tick"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5.4 C12.8 8 10.6 10 8.4 12 C10.6 14 12.8 16 15 18.6" /></svg></button>
+              <button type="button" class="tb-cur" aria-expanded="false" aria-controls="tb-list"><span class="cur" data-cur>00 · {note.data.title}</span><span class="tb-sign" aria-hidden="true"></span></button>
+              <button type="button" class="tb-step" data-step="1" aria-label="Next section" data-sound="tick"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.4 C11.2 8 13.4 10 15.6 12 C13.4 14 11.2 16 9 18.6" /></svg></button>
+            </div>
+            <ol id="tb-list" hidden><li class="top"><a href="#note-top" data-sound="tick">{note.data.title}</a></li>{sections.map((h) => <li><a href={`#${h.slug}`} data-sound="tick">{h.text}</a></li>)}</ol>
+          </div>
+        </div>
+      )}
       <div class="cols">
       <div class="message">
         <p class="label muted"><a href="/notes/" data-sound="tick">Notes</a> · {note.data.category}{note.data.placeholder && ' · placeholder'}</p>
@@ -44,12 +58,19 @@ const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month:
           </button>
         </span></h1>
         <p class="lead muted">{note.data.summary}</p>
+        {/* phones: the contents opens from here, at the top, where a long note needs it. The pinned column's copy is hidden on phones. */}
+        {sections.length >= 3 && (
+          <details class="toc toc-top hand-b">
+            <summary class="label muted"><span>In this note</span><span class="count">{sections.length + 1}</span></summary>
+            <ol><li class="top"><a href="#note-top" data-sound="tick">{note.data.title}</a></li>{sections.map((h) => <li><a href={`#${h.slug}`} data-sound="tick">{h.text}</a></li>)}</ol>
+          </details>
+        )}
         <div class="prose"><Content /></div>
         <Signature class="sign" />
       </div>
       <aside class="back hand-l" aria-label="Postcard details">
         <div class="back-inner">
-          <Reactions noteId={note.id} />
+          <div class="react"><Reactions noteId={note.id} /></div>
           <div class="stamp-spot">
             <p class="label muted"><span lang="ja">航空便</span> · Par avion</p>
             <div class="stamp-pm">
@@ -92,24 +113,69 @@ const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month:
     });
   });
 
-  // Scroll-spy: the contents entry for the section being read is marked active. A section counts as "being read"
-  // once its heading has passed about a third of the way down the window; at the very bottom the last one wins.
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
-  const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
-  if (links.length) {
+  // Scroll-spy: the contents entry for the section being read is marked active (in every copy of the contents: the pinned column on
+  // desktop, the one under the summary on phones). A section counts as "being read" once its heading has passed about a third of the
+  // way down the window; at the very bottom the last one wins. Choosing an entry in the phone contents closes it.
+  const tocs = [...document.querySelectorAll<HTMLElement>('.toc')].map((el) => {
+    const links = [...el.querySelectorAll<HTMLAnchorElement>('a')];
+    return { el, links, targets: links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))) };
+  });
+  document.querySelectorAll<HTMLDetailsElement>('details.toc').forEach((d) => d.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { d.open = false; })));
+  const cur = document.querySelector<HTMLElement>('[data-cur]');
+  if (tocs.length) {
     let raf = 0;
     const update = () => {
       raf = 0;
-      const line = innerHeight * 0.33;
-      let active = 0;
-      targets.forEach((t, i) => { if (t && t.getBoundingClientRect().top <= line) active = i; });
-      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) active = links.length - 1;
-      links.forEach((a, i) => { if (i === active) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+      tocs.forEach(({ el, links, targets }) => {
+        // the bar sits at the top, so its section changes as a heading passes just under it; the others change a third of the way down the window
+        const line = el.classList.contains('toc-bar') ? 110 : innerHeight * 0.33;
+        let active = 0;
+        targets.forEach((t, i) => { if (t && t.getBoundingClientRect().top <= line) active = i; });
+        if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) active = links.length - 1;
+        links.forEach((a, i) => { if (i === active) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+        if (el.classList.contains('toc-bar') && cur) { // the bar names the section being read, and its arrows stop at the ends
+          cur.textContent = `${String(active).padStart(2, '0')} · ${links[active].textContent}`; el.dataset.active = String(active);
+          el.querySelector<HTMLButtonElement>('[data-step="-1"]')!.disabled = active === 0; el.querySelector<HTMLButtonElement>('[data-step="1"]')!.disabled = active === links.length - 1;
+        }
+      });
     };
     const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
     addEventListener('scroll', queue, { passive: true });
     addEventListener('resize', queue);
     update();
+  }
+
+  // Phone contents bar: it stays on screen once the inline "In this note" row has scrolled away, for as long as you are in the message (it goes
+  // before the signature, so it never sits over the reactions). Previous and next arrows jump one section; the middle opens the full list, which
+  // closes when you choose an entry, press Escape or tap outside. Reduced motion: it simply appears and disappears.
+  const bar = document.querySelector<HTMLElement>('[data-tocbar]');
+  const card = bar?.querySelector<HTMLElement>('.toc-bar');
+  const toggle = bar?.querySelector<HTMLButtonElement>('.tb-cur');
+  const list = bar?.querySelector<HTMLElement>('#tb-list');
+  const inlineRow = document.querySelector<HTMLElement>('details.toc-top');
+  const endMark = document.querySelector<HTMLElement>('.sign');
+  if (bar && card && toggle && list && inlineRow && endMark) {
+    const setList = (open: boolean) => { list.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); card.classList.toggle('open', open); };
+    const barToc = tocs.find((t) => t.el === card)!;
+    const step = (dir: number) => {
+      const active = Number(card.dataset.active ?? 0), to = Math.min(Math.max(active + dir, 0), barToc.targets.length - 1);
+      barToc.targets[to]?.scrollIntoView({ block: 'start' });
+    };
+    toggle.addEventListener('click', () => setList(list.hidden));
+    card.querySelectorAll<HTMLElement>('[data-step]').forEach((b) => b.addEventListener('click', () => step(Number(b.dataset.step))));
+    list.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setList(false)));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !list.hidden) { setList(false); toggle.focus(); } });
+    addEventListener('pointerdown', (e) => { if (!list.hidden && !card.contains(e.target as Node)) setList(false); });
+    let raf2 = 0;
+    const tick = () => {
+      raf2 = 0;
+      const inMessage = inlineRow.getBoundingClientRect().bottom < 0 && endMark.getBoundingClientRect().top > 80;
+      bar.classList.toggle('show', inMessage);
+      if (!inMessage) setList(false);
+    };
+    addEventListener('scroll', () => { if (!raf2) raf2 = requestAnimationFrame(tick); }, { passive: true });
+    addEventListener('resize', () => { if (!raf2) raf2 = requestAnimationFrame(tick); });
+    tick();
   }
 </script>
 <style>
@@ -173,6 +239,7 @@ const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month:
   /* a small label that shows on hover or focus, and says Copied for a moment after a press */
   .tip { position: absolute; left: 50%; top: calc(100% + 0.5rem); translate: -50% 0; z-index: 5; padding: 0.15rem 0.5rem; border-radius: var(--radius-1); background: var(--color-strong); color: var(--color-on-strong); font-family: var(--font-mono); font-size: var(--step--2); letter-spacing: 0.04em; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateY(-3px); transition: opacity var(--dur-fast), transform var(--dur-fast) var(--ease-out); }
   .copy:hover .tip, .copy:focus-visible .tip, .copy.done .tip { opacity: 1; transform: none; }
+  .toc-top, .tocbar { display: none; }
   .address { display: grid; gap: var(--space-2); }
   .address ul { display: grid; }
   .address li { font-size: var(--step--1); font-weight: 500; padding-block: var(--space-2); }
@@ -183,11 +250,59 @@ const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month:
 
 
   @media (max-width: 52rem) {
-    .cols { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); padding: var(--space-5); }
-    /* on a phone the address side drops under the message, with a dashed rule in place of the vertical divider */
-    .back { margin: 0; padding: var(--space-5) 0 0; }
-    .back::before { display: none; }
-    .back-inner { position: static; }
+    .note { padding-block: var(--space-6); gap: var(--space-5); }
+    .cols { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); padding: var(--space-5) var(--space-4); }
+    /* On a phone the postcard's right column is taken apart so each piece can go where it helps most. The postmark and date stamp (read time and
+       date are things you want before you start) move to the top, like the stamp on the front of a card. The rest (reactions, more notes)
+       follows the message, under a hand-drawn dashed rule in place of the vertical divider. */
+    .back, .back-inner { display: contents; }
+    .back::before { display: none; } /* the desktop's vertical divider would otherwise draw down the card's left edge */
+    .stamp-spot { order: -1; }
+    .react { position: relative; padding-top: var(--space-4); }
+    .react::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--rule-height); transform: translateY(-50%); pointer-events: none;
+      background: var(--color-rule); -webkit-mask: var(--hand-dash-c) center / var(--rule-tile) var(--rule-height) repeat-x; mask: var(--hand-dash-c) center / var(--rule-tile) var(--rule-height) repeat-x; }
+    .back .toc { display: none; } /* the contents sits under the summary on phones */
+    .message :global(.sign) { margin-top: var(--space-2); }
+    /* contents under the summary: a 44px tap row that opens a list with comfortable tap targets */
+    .toc-top { display: block; margin-top: var(--space-1); padding-bottom: 0; }
+    .toc-top summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 2.75rem; cursor: pointer; list-style: none; }
+    .toc-top summary::-webkit-details-marker { display: none; }
+    .toc-top summary::after { content: "+"; font-family: var(--font-mono); font-size: var(--step-1); line-height: 1; color: var(--color-text); margin-left: auto; }
+    .toc-top[open] summary::after { content: "\2212"; }
+    .toc-top .count { padding: 0 0.45rem; border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-1); font-size: var(--step--2); color: var(--color-text-muted); }
+    .toc-top ol { padding-block: var(--space-1) var(--space-3); }
+    .toc-top li { padding-block: 0; font-size: var(--step-0); line-height: 1.3; }
+    .toc-top li a { display: block; flex: 1; padding-block: 0.7rem; }
+    .toc-top li::before { padding-top: 0.85rem; }
+    /* the button looks the size of the title; an invisible halo makes the tap area 44px */
+    /* the contents bar: a zero-height sticky wrapper just under the top stripe, holding a small floating card (arrows, current section, list) */
+    .tocbar { display: block; position: sticky; top: 0.55rem; height: 0; z-index: 3; }
+    .toc-bar { display: block; padding: 0; position: absolute; left: var(--space-3); right: var(--space-3); top: var(--space-2); margin: 0; background: var(--color-surface); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-2); box-shadow: var(--shadow-card);
+      opacity: 0; visibility: hidden; transform: translateY(-0.75rem); }
+    .tocbar.show .toc-bar { opacity: 1; visibility: visible; transform: none; }
+    .tb-row { display: flex; align-items: center; }
+    .tb-step { flex: none; display: grid; place-items: center; width: 2.75rem; height: 2.6rem; color: var(--color-text); }
+    .tb-step svg { width: 1.3rem; height: 1.3rem; }
+    .tb-step:disabled { opacity: 0.3; }
+    .tb-cur { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-2); height: 2.6rem; text-align: left; border-inline: var(--border) dashed var(--color-line); padding-inline: var(--space-3); }
+    .tb-cur .cur { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--step--1); font-weight: 600; }
+    .tb-sign::after { content: "+"; font-family: var(--font-mono); font-size: var(--step-1); line-height: 1; }
+    .toc-bar.open .tb-sign::after { content: "\2212"; }
+    .toc-bar ol[hidden] { display: none; }
+    .toc-bar ol { padding: var(--space-1) var(--space-3) var(--space-3); max-height: min(60vh, 26rem); overflow-y: auto; overscroll-behavior: contain; border-top: var(--border) solid var(--color-line); }
+    .toc-bar li { padding-block: 0; font-size: var(--step-0); line-height: 1.3; }
+    .toc-bar li a { display: block; flex: 1; padding-block: 0.7rem; }
+    .toc-bar li::before { padding-top: 0.85rem; }
+    @media (prefers-reduced-motion: no-preference) {
+      .toc-bar { transition: opacity var(--dur-med) var(--ease-out), transform var(--dur-med) var(--ease-out), visibility 0s linear var(--dur-med); }
+      .tocbar.show .toc-bar { transition-delay: 0s; }
+    }
+    /* section links land below the bar, not under it */
+    :global(html) { scroll-padding-top: 5.5rem; }
+    .copy { width: 2rem; height: 2rem; }
+    .copy svg { width: 1.1rem; height: 1.1rem; }
+    .copy::before { content: ""; position: absolute; inset: -0.375rem; }
+    .address li { padding-block: var(--space-3); }
   }
   @media (prefers-reduced-motion: reduce) { .copy, .copy svg, .tip { transition: none; } .arrow { transition: none; } .address a:hover .arrow { transform: none; } }
 </style>
