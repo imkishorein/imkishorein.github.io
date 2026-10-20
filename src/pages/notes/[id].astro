@@ -1,36 +1,193 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import DateStamp from '../../components/DateStamp.astro';
+import Postmark from '../../components/Postmark.astro';
+import Reactions from '../../components/Reactions.astro';
+import Signature from '../../components/Signature.astro';
 
 export async function getStaticPaths() {
   const all = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return all.map((note, i) => ({ params: { id: note.id }, props: { note, newer: all[i - 1], older: all[i + 1] } }));
+  return all.map((note, i) => {
+    const sameCategory = all.filter((n) => n.id !== note.id && n.data.category === note.data.category);
+    const related = (sameCategory.length ? sameCategory : all.filter((n) => n.id !== note.id)).slice(0, 2).map((n) => ({ id: n.id, title: n.data.title }));
+    return { params: { id: note.id }, props: { note, related, moreInCategory: sameCategory.length > 0 } };
+  });
 }
-const { note, newer, older } = Astro.props;
-const { Content } = await render(note);
+const { note, related, moreInCategory } = Astro.props;
+const { Content, headings } = await render(note);
+const titleWords = note.data.title.split(' ');
+const titleTail = titleWords.pop();
+const titleHead = titleWords.join(' ');
+const sections = headings.filter((h) => h.depth === 2);
+const words = (note.body ?? '').replace(/`[^`]*`|[#*_>\[\]()]/g, ' ').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 220));
+const day = note.data.date.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'UTC' });
+const mon = note.data.date.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+const yr = note.data.date.getUTCFullYear();
 const date = note.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 <Base title={note.data.title} description={note.data.summary}>
   <article class="wrap note">
-    <header class="head">
-      <p class="label muted"><a href="/notes/" data-sound="tick">Notes</a> · {note.data.category} · <time datetime={note.data.date.toISOString()}>{date}</time>{note.data.placeholder && ' · placeholder'}</p>
-      <h1 class="display h-page">{note.data.title}</h1>
-      <p class="lead muted">{note.data.summary}</p>
-    </header>
-    <div class="prose measure"><Content /></div>
-    <nav class="pager rule-top rule-solid" aria-label="More notes">
-      {newer ? <a href={`/notes/${newer.id}/`} data-sound="tick"><span class="label muted">Newer</span><span>{newer.data.title}</span></a> : <span />}
-      {older ? <a href={`/notes/${older.id}/`} data-sound="tick" class="r"><span class="label muted">Older</span><span>{older.data.title}</span></a> : <span />}
-    </nav>
+    <div id="note-top" class="postcard">
+      <div class="edge edge-top" aria-hidden="true"></div>
+      <div class="cols">
+      <div class="message">
+        <p class="label muted"><a href="/notes/" data-sound="tick">Notes</a> · {note.data.category}{note.data.placeholder && ' · placeholder'}</p>
+        {/* The last word and the copy button are kept together, so the button is always a suffix of the title, however many lines it wraps to. aria-label keeps the button's name out of the heading text. */}
+        <h1 id="note-title" class="display h-title" aria-label={note.data.title}>{titleHead}{titleHead && ' '}<span class="tail">{titleTail}
+          <button class="copy" type="button" data-copy-link data-sound="tick" aria-label="Copy link to this note">
+            <svg class="i-link" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.2 13.8 C8.4 12 8.4 9.4 10.2 7.6 L13 4.8 C14.8 3 17.6 3.1 19.3 4.8 C21 6.5 21 9.3 19.2 11.1 L17.6 12.7" /><path d="M13.8 10.2 C15.6 12 15.6 14.6 13.8 16.4 L11 19.2 C9.2 21 6.4 20.9 4.7 19.2 C3 17.5 3 14.7 4.8 12.9 L6.4 11.3" /></svg>
+            <svg class="i-done" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 12.6 C7 14.6 8.6 16.2 10 18 C13 12.6 16.6 8.6 19.8 6" /></svg>
+            <span class="tip" data-copy-label role="status">Copy link</span>
+          </button>
+        </span></h1>
+        <p class="lead muted">{note.data.summary}</p>
+        <div class="prose"><Content /></div>
+        <Signature class="sign" />
+      </div>
+      <aside class="back hand-l" aria-label="Postcard details">
+        <div class="back-inner">
+          <Reactions noteId={note.id} />
+          <div class="stamp-spot">
+            <p class="label muted"><span lang="ja">航空便</span> · Par avion</p>
+            <div class="stamp-pm">
+              <div class="pm"><Postmark id="pm-note" top="BENGALURU, INDIA" bottom={note.data.category.toUpperCase()} centre={String(minutes)} period="MIN READ" label={`Postmark: ${note.data.category} note, ${minutes} minute read`} /></div>
+              <time datetime={note.data.date.toISOString()} aria-label={date}><DateStamp main={day} sub={`${mon} ${yr}`} /></time>
+            </div>
+          </div>
+          {sections.length >= 3 && (
+            <nav class="toc hand-b" aria-label="In this note">
+              <p class="label muted">In this note</p>
+              <ol><li class="top"><a href="#note-top" data-sound="tick">{note.data.title}</a></li>{sections.map((h) => <li><a href={`#${h.slug}`} data-sound="tick">{h.text}</a></li>)}</ol>
+            </nav>
+          )}
+          <div class="address">
+            <p class="label muted">{moreInCategory ? `More in ${note.data.category}` : 'More notes'}</p>
+            <ul>
+              {related.map((r) => <li class="rule-bottom"><a href={`/notes/${r.id}/`} data-sound="tick"><span>{r.title}</span><svg class="arrow" viewBox="0 0 28 14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 7.4 C7 6.6 13 7.5 25.5 6.9" /><path d="M19.6 1.8 C22.2 4.2 24.2 5.7 26 6.8 C23.9 8.4 21.6 10.4 19.2 12.6" /></svg></a></li>)}
+            </ul>
+          </div>
+        </div>
+      </aside>
+      </div>
+      <div class="edge edge-bottom" aria-hidden="true"></div>
+    </div>
   </article>
 </Base>
+<script>
+  // Copy link: copies the note URL, then the icon turns into a tick and the label says Copied for a moment.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-link]').forEach((btn) => {
+    const label = btn.querySelector('[data-copy-label]')!;
+    btn.addEventListener('click', async () => {
+      const url = location.href.split('#')[0];
+      try { await navigator.clipboard.writeText(url); } catch {
+        // older or insecure contexts: fall back to a hidden textarea
+        const t = document.createElement('textarea'); t.value = url; t.style.cssText = 'position:fixed;opacity:0'; document.body.append(t); t.select();
+        const ok = document.execCommand('copy'); t.remove(); if (!ok) return;
+      }
+      label.textContent = 'Copied'; btn.classList.add('done');
+      setTimeout(() => { label.textContent = 'Copy link'; btn.classList.remove('done'); }, 1800);
+    });
+  });
+
+  // Scroll-spy: the contents entry for the section being read is marked active. A section counts as "being read"
+  // once its heading has passed about a third of the way down the window; at the very bottom the last one wins.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+  const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+  if (links.length) {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const line = innerHeight * 0.33;
+      let active = 0;
+      targets.forEach((t, i) => { if (t && t.getBoundingClientRect().top <= line) active = i; });
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) active = links.length - 1;
+      links.forEach((a, i) => { if (i === active) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+    };
+    const queue = () => { if (!raf) raf = requestAnimationFrame(update); };
+    addEventListener('scroll', queue, { passive: true });
+    addEventListener('resize', queue);
+    update();
+  }
+</script>
 <style>
-  .note { padding-block: var(--space-8) var(--space-8); display: grid; gap: var(--space-7); }
-  .head { display: grid; gap: var(--space-4); max-width: 46rem; }
-  .head a { text-underline-offset: 0.25em; }
-  .pager { display: flex; justify-content: space-between; gap: var(--space-5); padding-top: var(--space-5); }
-  .pager a { display: grid; gap: var(--space-1); text-decoration: none; max-width: 22rem; }
-  .pager a:hover span:last-child { text-decoration: underline; text-underline-offset: 0.2em; }
-  .r { text-align: right; margin-left: auto; }
+  /* section links glide, and the heading lands with room above it */
+  :global(html) { scroll-padding-top: var(--space-7); }
+  @media (prefers-reduced-motion: no-preference) { :global(html) { scroll-behavior: smooth; } }
+  .note { padding-block: var(--space-8); display: grid; gap: var(--space-7); }
+
+  /* The back of a postcard: message on the left, a hand-drawn divider, stamp and address lines on the right. */
+  .postcard {
+    scroll-margin-top: var(--space-5); /* with the page's scroll padding, the card lands with a little air above it */
+    position: relative; background: var(--color-surface); border-radius: var(--radius-2); box-shadow: var(--shadow-card);
+  }
+  .cols { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: var(--space-7); padding: var(--space-6) var(--space-7); }
+  /* The airmail stripes are the postcard's frame: on a long note they stay pinned to the top and bottom of the window
+     while the message scrolls between them, so you always see a postcard, not an endless sheet. Where the card begins or
+     ends, they sit at its real edges. Opaque, so text slides under them cleanly. */
+  .edge { position: sticky; z-index: 4; height: 0.55rem; background: var(--airmail-stripes); }
+  .edge-top { top: 0; border-radius: var(--radius-2) var(--radius-2) 0 0; }
+  .edge-bottom { bottom: 0; border-radius: 0 0 var(--radius-2) var(--radius-2); }
+
+  .message { display: grid; gap: var(--space-4); align-content: start; min-width: 0; }
+  .message a { text-underline-offset: 0.25em; }
+  .h-title { font-size: var(--step-3); overflow-wrap: anywhere; }
+  .lead { max-width: 40ch; }
+  .prose { margin-top: var(--space-3); max-width: var(--measure); }
+  .message :global(.sign) { margin-top: var(--space-4); }
+
+  /* the divider spans the whole card; the details stay pinned beside the text while a long note scrolls */
+  .back-inner { position: sticky; top: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); }
+  .back { padding-left: var(--space-7); margin-left: calc(var(--space-7) * -0.5); }
+  /* the stamp zone: postmark on the left, stamp on the right, side by side and never overlapping. Both share the
+     column's edges with the reaction tiles above and the contents below, and tilt in opposite directions. */
+  .stamp-spot { display: grid; gap: var(--space-2); }
+  .stamp-pm { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); }
+  .stamp-pm .pm { min-width: 0; pointer-events: none; }
+  .stamp-pm time { display: block; transform: rotate(2.5deg); transform-origin: 100% 50%; }
+  .toc { display: grid; gap: var(--space-2); padding-bottom: var(--space-4); }
+  .toc ol { list-style: none; display: grid; counter-reset: toc; }
+  .toc li { counter-increment: toc; display: flex; gap: var(--space-3); padding-block: 0.08rem; font-size: var(--step--1); line-height: 1.3; }
+  .toc li::before { content: counter(toc, decimal-leading-zero); font-family: var(--font-mono); font-size: var(--step--2); color: var(--color-text-muted); padding-top: 0.15em; }
+  .toc .top { counter-increment: none; }
+  .toc .top::before { content: "00"; }
+  .toc a { text-decoration: none; text-wrap: balance; background: linear-gradient(var(--color-selection), var(--color-selection)) 0 90% / 0% 0.5em no-repeat; transition: background-size var(--dur-med) var(--ease-out), font-weight var(--dur-fast); }
+  /* the section being read: a sage highlighter stroke under the title, and a bolder number */
+  .toc a[aria-current] { background-size: 100% 0.5em; font-weight: 600; }
+  .toc li:has(a[aria-current])::before { color: var(--color-text); font-weight: 700; }
+  .toc a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+  /* the title with a small copy-link button right after its last word */
+  .tail { white-space: nowrap; }
+  .copy { position: relative; display: inline-grid; place-items: center; vertical-align: middle; translate: 0 -0.09em; margin-left: var(--space-3); width: 2.15rem; height: 2.15rem; padding: 0; cursor: pointer; color: var(--color-text);
+    background: var(--color-surface); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-2); box-shadow: 0 2px 0 var(--color-line-strong);
+    transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background var(--dur-fast); }
+  .copy:hover { transform: translateY(-1px); box-shadow: 0 3px 0 var(--color-line-strong); background: color-mix(in oklab, var(--color-surface) 70%, var(--color-accent)); }
+  .copy:active { transform: translateY(2px); box-shadow: 0 0 0 var(--color-line-strong); }
+  .copy svg { width: 1.2rem; height: 1.2rem; grid-area: 1 / 1; transition: opacity var(--dur-fast), transform var(--dur-med) var(--ease-press); }
+  .copy .i-done { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+  .copy.done .i-link { opacity: 0; transform: scale(0.6) rotate(10deg); }
+  .copy.done .i-done { opacity: 1; transform: none; }
+  .copy.done { background: var(--color-accent); }
+  /* a small label that shows on hover or focus, and says Copied for a moment after a press */
+  .tip { position: absolute; left: 50%; top: calc(100% + 0.5rem); translate: -50% 0; z-index: 5; padding: 0.15rem 0.5rem; border-radius: var(--radius-1); background: var(--color-strong); color: var(--color-on-strong); font-family: var(--font-mono); font-size: var(--step--2); letter-spacing: 0.04em; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateY(-3px); transition: opacity var(--dur-fast), transform var(--dur-fast) var(--ease-out); }
+  .copy:hover .tip, .copy:focus-visible .tip, .copy.done .tip { opacity: 1; transform: none; }
+  .address { display: grid; gap: var(--space-2); }
+  .address ul { display: grid; }
+  .address li { font-size: var(--step--1); font-weight: 500; padding-block: var(--space-2); }
+  .address a { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); text-decoration: none; }
+  .address a:hover span { text-decoration: underline; text-underline-offset: 0.2em; }
+  .arrow { flex: none; width: 1.7rem; height: auto; color: var(--color-text-muted); transition: transform var(--dur-med) var(--ease-press), color var(--dur-fast); }
+  .address a:hover .arrow, .address a:focus-visible .arrow { transform: translateX(4px) rotate(-2deg); color: var(--color-text); }
+
+
+  @media (max-width: 52rem) {
+    .cols { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); padding: var(--space-5); }
+    /* on a phone the address side drops under the message, with a dashed rule in place of the vertical divider */
+    .back { margin: 0; padding: var(--space-5) 0 0; }
+    .back::before { display: none; }
+    .back-inner { position: static; }
+  }
+  @media (prefers-reduced-motion: reduce) { .copy, .copy svg, .tip { transition: none; } .arrow { transition: none; } .address a:hover .arrow { transform: none; } }
 </style>

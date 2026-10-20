@@ -1,0 +1,203 @@
+---
+// Reactions for a note. No hearts or thumbs: four small hand-drawn objects from the site's world.
+//   crane   (origami, a wish folded in paper)  = Love it
+//   sprout  (botanical, something new grew)    = Learned something
+//   seal    (hanko, the stamp of approval)     = Agree
+//   lantern (the Hoi An light)                 = Sparked an idea
+// Duotone like the postbox and weather icons: ink outlines, sage fills, all colours are tokens.
+// Like claps on Medium: press a tile again and again (or hold it) to react up to MAX times. Each press floats a +N
+// above the tile. For now the tally is only remembered in this browser (localStorage, one key per note, an object of
+// counts). There are no shared totals because the site has no backend yet.
+interface Props { noteId: string; }
+const { noteId } = Astro.props;
+const MAX = 50;
+const items = [
+  { key: 'crane', label: 'Love it', sound: 'rustle' },
+  { key: 'sprout', label: 'Learned something', sound: 'tick' },
+  { key: 'seal', label: 'Agree', sound: 'thunk' },
+  { key: 'lantern', label: 'Sparked an idea', sound: 'on' },
+];
+---
+<section class="reactions" aria-label="Leave a mark" data-reactions={noteId} data-max={MAX}>
+  <div class="top"><p class="hint label muted" data-react-hint aria-live="polite">Leave a mark</p><button type="button" class="clear label" data-react-clear hidden>Clear</button></div>
+  <ul>
+    {items.map((it) => (
+      <li>
+        <button type="button" class={`react react-${it.key}`} data-react={it.key} data-sound={it.sound} aria-pressed="false" aria-label={it.label} data-label={it.label}>
+          <span class="count" aria-hidden="true"></span>
+          <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            {it.key === 'crane' && (<>
+              <g class="wing wing-l"><path d="M24 27 C21 21 17 15 12 9 C14 17 16 24 19 31 Z" class="paper" /><path d="M16 17 L21 27" class="fold" /></g>
+              <g class="wing wing-r"><path d="M26 27 C29 20 34 14 40 10 C38 18 35 25 31 31 Z" class="paper" /><path d="M34 18 L28 27" class="fold" /></g>
+              <path d="M9 32 C15 27 22 26 27 28 C33 30 36 33 37 36 C30 38 20 38 13 36 Z" class="body" />
+              <path d="M9 32 C6 28 5 23 6.5 17" />
+              <path d="M6.5 17 L3 18.6 L6.8 15.4" />
+              <path d="M37 36 L45 33 L41 40 Z" class="paper" />
+              <path d="M16 32 C22 33 28 33 33 33" class="fold" />
+            </>)}
+            {it.key === 'sprout' && (<>
+              <path d="M10 40 C17 37 31 37 38 40" />
+              <path d="M17 43 C21 42 27 42 31 43" class="fold" />
+              <path d="M24 38 C24 32 23.6 26 24.2 19" class="stem" />
+              <g class="leaf leaf-l"><path d="M24 29 C15 30 9 24 8.5 16 C17 15.5 23.5 20.5 24 29 Z" class="body" /><path d="M24 29 C19 25 14 21 11 18" class="fold" /></g>
+              <g class="leaf leaf-r"><path d="M24 22 C24 14 30 8 39 8 C39.5 16.5 33 22.5 24 22 Z" class="body" /><path d="M24 22 C29 18 33 14 36 11" class="fold" /></g>
+              <circle cx="13" cy="39" r="0.9" class="dot" /><circle cx="36" cy="38.4" r="0.9" class="dot" />
+            </>)}
+            {it.key === 'seal' && (<>
+              <g class="impression">
+                <path d="M9 10.5 C18 9 30 9.4 39 10.2 C40.2 19 39.8 30 39 38.4 C30 39.6 19 39.2 9.8 38.6 C8.6 29 8.8 19 9 10.5 Z" class="body" />
+                <path d="M13 14.2 C20 13.2 28 13.4 35.2 14 C36 21 35.6 28 35 34.8 C28 35.6 20 35.4 13.4 34.8 C12.6 28 12.8 21 13 14.2 Z" class="paper" />
+                <path d="M16.4 17.4 C22 16.8 27 16.9 32 17.3" class="fold" /><path d="M16.2 32 C22 32.6 27 32.5 32 32" class="fold" />
+                <text x="24" y="31" text-anchor="middle" class="kanji" stroke="none">印</text>
+              </g>
+              <path d="M5 43.4 C15 42.6 33 42.8 43 43.6" class="fold" />
+            </>)}
+            {it.key === 'lantern' && (<>
+              <g class="rays" stroke-width="1.5">
+                <path d="M4.5 25 L9 25" /><path d="M43.5 25 L39 25" /><path d="M8 12.5 L11.4 15.4" /><path d="M40 12.5 L36.6 15.4" /><path d="M8 37.5 L11.4 34.6" /><path d="M40 37.5 L36.6 34.6" />
+              </g>
+              <path d="M24 2.5 L24 8" />
+              <path d="M18 8.2 C21 7.4 27 7.4 30 8.2 L29.6 11.6 C26.6 11 21.4 11 18.4 11.6 Z" class="paper" />
+              <path d="M18.4 11.6 C12.5 16.5 11.5 31 18.4 36.4 C22 38 26 38 29.6 36.4 C36.5 31 35.5 16.5 29.6 11.6 C26.6 11 21.4 11 18.4 11.6 Z" class="body glass" />
+              <path d="M13.6 18.8 C20 20.4 28 20.4 34.4 18.8" class="fold" /><path d="M12.6 24.6 C20 26.4 28 26.4 35.4 24.6" class="fold" /><path d="M13.6 30.4 C20 32 28 32 34.4 30.4" class="fold" />
+              <path d="M18.6 36.2 C22 37.2 26 37.2 29.4 36.2 L28.8 39.4 C26 40 22 40 19.2 39.4 Z" class="paper" />
+              <path d="M24 40 L24 45.2" /><path d="M22 44.6 L24 46.4 L26 44.6" />
+            </>)}
+          </svg>
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+<script>
+  // The tally for this note in this browser: { crane: 3, seal: 12 }. An older version stored a plain list of names, so those count as 1 each.
+  document.querySelectorAll<HTMLElement>('[data-reactions]').forEach((box) => {
+    const key = `imk:react:${box.dataset.reactions}`;
+    const MAX = Number(box.dataset.max) || 50;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const read = (): Record<string, number> => {
+      try {
+        const v = JSON.parse(localStorage.getItem(key) || '{}');
+        if (Array.isArray(v)) return Object.fromEntries(v.map((k: string) => [k, 1]));
+        return v && typeof v === 'object' ? v : {};
+      } catch { return {}; }
+    };
+    const write = (v: Record<string, number>) => { try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* private mode */ } };
+    const buttons = [...box.querySelectorAll<HTMLButtonElement>('[data-react]')];
+    const hint = box.querySelector<HTMLElement>('[data-react-hint]')!;
+    const clear = box.querySelector<HTMLButtonElement>('[data-react-clear]')!;
+    const rest = hint.textContent || '';
+    let tally = read();
+    const say = (t: string) => { hint.textContent = t; };
+    const label = (b: HTMLButtonElement) => { const n = tally[b.dataset.react!] || 0; return n ? `${b.dataset.label} x${n}` : b.dataset.label!; };
+    const paint = () => {
+      buttons.forEach((b) => {
+        const n = tally[b.dataset.react!] || 0;
+        b.setAttribute('aria-pressed', String(n > 0));
+        b.setAttribute('aria-label', n ? `${b.dataset.label}, ${n} so far` : b.dataset.label!);
+        const c = b.querySelector<HTMLElement>('.count')!; c.textContent = n ? String(n) : ''; c.classList.toggle('max', n >= MAX);
+      });
+      clear.hidden = !Object.values(tally).some((n) => n > 0);
+    };
+    // the +N that floats up from a tile. Milestones (10, 20, 30, 40, 50) are bigger.
+    const float = (b: HTMLButtonElement, n: number, atMax: boolean) => {
+      if (reduce) return;
+      const f = document.createElement('span');
+      f.className = 'float' + (n % 10 === 0 || atMax ? ' big' : '');
+      f.textContent = atMax ? 'MAX' : `+${n}`;
+      f.style.setProperty('--dx', `${Math.round(Math.random() * 18 - 9)}px`);
+      f.style.setProperty('--rot', `${Math.round(Math.random() * 16 - 8)}deg`);
+      b.append(f); f.addEventListener('animationend', () => f.remove());
+    };
+    const bump = (b: HTMLButtonElement) => {
+      b.dispatchEvent(new CustomEvent('react-bump')); // the stamp cursor (site.ts) taps down on every counted press
+      const k = b.dataset.react!, cur = tally[k] || 0;
+      if (cur >= MAX) { float(b, cur, true); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); return false; }
+      tally = { ...tally, [k]: cur + 1 }; write(tally); paint(); say(label(b)); float(b, cur + 1, false);
+      b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+      return cur + 1 < MAX;
+    };
+    buttons.forEach((b) => {
+      b.addEventListener('mouseenter', () => say(label(b)));
+      b.addEventListener('focus', () => say(label(b)));
+      b.addEventListener('mouseleave', () => say(rest));
+      b.addEventListener('blur', () => say(rest));
+      // press, and keep pressing: a press counts at once, holding repeats like a clap run
+      let hold: number | undefined, repeat: number | undefined, fromPointer = false;
+      const stop = () => { clearTimeout(hold); clearInterval(repeat); };
+      b.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        fromPointer = true; bump(b); stop();
+        hold = window.setTimeout(() => { repeat = window.setInterval(() => { if (!bump(b)) stop(); }, 130); }, 380);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach((t) => b.addEventListener(t, stop));
+      // the click that follows a pointer press is already counted; keyboard clicks (Enter, Space) are not
+      b.addEventListener('click', () => { if (fromPointer) { fromPointer = false; return; } bump(b); });
+    });
+    clear.addEventListener('click', () => { tally = {}; write(tally); paint(); say(rest); });
+    paint();
+  });
+</script>
+<style>
+  .reactions { display: grid; gap: var(--space-2); }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+  .hint { min-height: 1.2em; }
+  .clear { background: none; border: 0; padding: 0; cursor: pointer; font-size: var(--step--2); color: var(--color-text-muted); text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: var(--color-line-strong); }
+  .clear:hover { color: var(--color-text); }
+  .clear[hidden] { display: none; }
+  .reactions ul { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
+  /* a tile that looks pressable: a raised card with a hard edge underneath that squashes when you press it, and sinks when it is on */
+  .react { position: relative; user-select: none; -webkit-user-select: none; touch-action: manipulation; display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0.3rem; color: var(--color-text); cursor: pointer;
+    background: var(--color-surface); border: var(--border) solid var(--color-line-strong); border-radius: var(--radius-2);
+    box-shadow: 0 3px 0 var(--color-line-strong); transform: translateY(0);
+    transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background var(--dur-fast); }
+  .react:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--color-line-strong); background: color-mix(in oklab, var(--color-surface) 70%, var(--color-accent)); }
+  .react:active { transform: translateY(3px); box-shadow: 0 0 0 var(--color-line-strong); }
+  .react[aria-pressed="true"] { transform: translateY(2px); box-shadow: 0 1px 0 var(--color-line-strong), inset 0 2px 5px color-mix(in oklab, var(--color-shadow) 35%, transparent); background: var(--color-surface-sunken); }
+  .react svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  /* running total in the corner, and the +N that drops down from each press */
+  .count { position: absolute; right: -0.35rem; top: -0.45rem; min-width: 1.15rem; padding: 0.05rem 0.3rem; border-radius: 99px; background: var(--color-strong); color: var(--color-on-strong); font-family: var(--font-mono); font-size: 0.62rem; line-height: 1.25; text-align: center; pointer-events: none; }
+  .count:empty { display: none; }
+  .count.max { background: var(--color-accent); color: var(--color-on-accent); outline: 1px solid var(--color-strong); }
+  .react :global(.float) { position: absolute; left: 50%; top: 100%; z-index: 3; translate: -50% 0.35rem; padding: 0.1rem 0.4rem; border-radius: 99px; background: var(--color-surface); border: var(--border) solid var(--color-line-strong); color: var(--color-text); font-family: var(--font-accent); font-size: 0.78rem; line-height: 1.2; white-space: nowrap; pointer-events: none; animation: r-float 900ms var(--ease-out) forwards; }
+  .react :global(.float.big) { background: var(--color-strong); color: var(--color-on-strong); font-size: 0.95rem; animation-duration: 1200ms; }
+
+  /* shared look: sage fills, paper panels, soft fold lines */
+  .react :global(.body) { fill: var(--color-accent); }
+  .react :global(.paper) { fill: var(--color-surface); }
+  .react :global(.fold) { stroke-width: 1.1; opacity: 0.55; }
+  .react :global(.ink-fill) { fill: var(--color-text); }
+  .react :global(.dot) { fill: var(--color-text); stroke: none; opacity: 0.5; }
+  .react :global(.stem) { stroke-width: 2.2; }
+
+  /* resting states: not yet pressed */
+  .react-lantern :global(.rays) { opacity: 0; }
+  .react-sprout :global(.leaf-l), .react-sprout :global(.leaf-r) { transform-box: fill-box; }
+  .react-sprout :global(.leaf-l) { transform-origin: 100% 100%; transform: rotate(14deg) scale(0.82); }
+  .react-sprout :global(.leaf-r) { transform-origin: 0% 100%; transform: rotate(-14deg) scale(0.82); }
+  .react-crane :global(.wing) { transform-box: fill-box; }
+  .react-crane :global(.wing-l) { transform-origin: 100% 100%; transform: rotate(10deg); }
+  .react-crane :global(.wing-r) { transform-origin: 0% 100%; transform: rotate(-10deg); }
+  .react :global(.kanji) { fill: var(--color-text); font-family: var(--font-jp); font-size: 17px; font-weight: 700; }
+
+  /* pressed states */
+  .react-lantern[aria-pressed="true"] :global(.rays) { opacity: 1; }
+  .react-lantern[aria-pressed="true"] :global(.glass) { fill: color-mix(in oklab, var(--color-accent) 55%, var(--color-surface)); filter: drop-shadow(0 0 5px var(--color-accent)); }
+  .react-sprout[aria-pressed="true"] :global(.leaf-l), .react-sprout[aria-pressed="true"] :global(.leaf-r) { transform: none; }
+  .react-crane[aria-pressed="true"] :global(.wing-l), .react-crane[aria-pressed="true"] :global(.wing-r) { transform: none; }
+  .react-crane[aria-pressed="true"] :global(.body) { fill: var(--color-accent); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.react .wing), :global(.react .leaf), :global(.react .impression), :global(.react .rays), :global(.react .glass) { transition: transform 420ms var(--ease-press), opacity 300ms, fill 300ms, filter 300ms; }
+    .react.pop.react-crane svg { animation: r-flap 700ms var(--ease-out); }
+    .react.pop.react-seal :global(.impression) { animation: r-stamp 380ms var(--ease-press); }
+    .react.pop.react-lantern svg { animation: r-swing 900ms var(--ease-out); transform-origin: 50% 5%; }
+    .react.pop.react-sprout svg { animation: r-grow 520ms var(--ease-press); transform-origin: 50% 90%; }
+    /* the chip drops from under the tile, because the stamp cursor covers everything above and beside the pointer */
+    @keyframes r-float { 0% { transform: translate(var(--dx), -0.4rem) rotate(var(--rot)) scale(0.6); opacity: 0; } 18% { opacity: 1; transform: translate(var(--dx), 0.3rem) rotate(var(--rot)) scale(1.05); } 100% { transform: translate(var(--dx), 2.4rem) rotate(var(--rot)) scale(0.95); opacity: 0; } }
+    @keyframes r-flap { 0% { transform: translateY(0); } 30% { transform: translateY(-7px) rotate(-5deg); } 60% { transform: translateY(-2px) rotate(3deg); } 100% { transform: none; } }
+    @keyframes r-stamp { 0% { transform: translateY(-10px) scale(1.25); opacity: 0; } 60% { transform: translateY(1px) scale(0.96); opacity: 1; } 100% { transform: none; } }
+    @keyframes r-swing { 0% { transform: rotate(0); } 25% { transform: rotate(9deg); } 55% { transform: rotate(-6deg); } 80% { transform: rotate(3deg); } 100% { transform: rotate(0); } }
+    @keyframes r-grow { 0% { transform: scale(0.85); } 60% { transform: scale(1.08); } 100% { transform: none; } }
+  }
+</style>

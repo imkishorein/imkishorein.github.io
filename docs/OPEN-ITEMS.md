@@ -6,7 +6,8 @@
 - [ ] Portrait: a front-facing illustrated avatar now stands in (hand-drawn SVG from two of Kishore's photos, `PortraitArt.astro`). Review the likeness. A real photo could still be added to About later.
 - [ ] Stuff list. Camera gear is real (Sony A6700, Tamron 17-70 f/2.8, Sigma 56 f/1.4). The rest is placeholder.
 - [ ] Friends of Figma Bangalore photos, numbers and reflections for Community
-- [ ] Real notes. Both seed notes are placeholders.
+- [ ] Real notes. All three notes are placeholders, including the long one drafted from the repo docs (`why-this-site-is-a-postcard.md`, written in his voice, marked `placeholder: true`).
+- [ ] Real signature: the one on notes is an invented hand. Draw it once on paper or a tablet, send an image, and trace it with the same pen-pressure approach (`Signature.astro`). The six doodles can stay or change.
 - [ ] Work case studies (Work page is a stub)
 - [ ] Photography selects (Photography page is a stub)
 
@@ -14,10 +15,13 @@
 - [ ] About page prose and "How I work" were drafted from his LinkedIn text
 - [x] "8+ years" figure: Kishore confirmed 8+ on 2026-10-19 (hero rubber stamp and About).
 - [ ] Japanese nav labels (葉書 postcard, 仕事 work, メモ notes, 仲間 community, 写真 photography, 道具 stuff, 私 about, 印 seal). Standard words, not checked by a native reader.
-- [ ] Sound volume and character were never heard by ear, only tested for errors
+- [ ] Sound volume and character were never heard by ear, only tested for errors (including the new reaction sounds)
+- [ ] Note page was only checked at desktop widths. Check phone width, dark mode, the pinned right column on short screens, and the copy-link button in a real browser (the test browser blocked the clipboard).
 - [ ] Hero: Japanese label 航空便 (airmail) not checked by a native reader. Weather comes from Open-Meteo at city-centre coordinates (12.97, 77.59): confirm you are happy with a third-party request.
 
 ## Decisions still open
+- [ ] Reaction totals shared between visitors. Today reactions are per browser only. Needs a small backend (Cloudflare Pages Function with free KV storage); the cap would then be per visitor.
+- [ ] Reaction meanings (Love it, Learned something, Agree, Sparked an idea) and the crane and seal icons were not confirmed as final; the crane is the weakest drawing.
 - [ ] Final font pairing. Interim is Geist. Second font was dictated as "Monopixel": Geist Pixel vs Geist Mono was never explicitly confirmed. Revisit with a specimen page against other sans + mono pairings.
 - [ ] OG image for link previews
 

@@ -373,6 +373,31 @@ if (hero && canHover.matches) {
     }, impact);
   });
 }
+/* reactions on a note: the same wooden stamp follows the mouse over the four tiles instead of a hand pointer.
+   Every counted press (a click, or a repeat while holding) fires a 'react-bump' event from Reactions.astro and the stamp taps down. */
+const reactTiles = [...document.querySelectorAll<HTMLElement>('[data-react]')];
+if (reactTiles.length && canHover.matches) {
+  const cur = document.createElement('div'); cur.className = 'stamp-cursor'; cur.innerHTML = STAMP_SVG; document.body.append(cur);
+  const art = cur.querySelector('svg') as SVGElement;
+  let px = 0, py = 0, raf = 0, over: HTMLElement | null = null;
+  const place = () => { raf = 0; cur.style.transform = `translate(${px - 20}px, ${py - 72}px)`; };
+  const move = (e: PointerEvent) => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(place); };
+  const off = () => { over?.classList.remove('has-stamp-cursor'); over = null; cur.classList.remove('on'); };
+  reactTiles.forEach((tile) => {
+    tile.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'mouse') return; over = tile; tile.classList.add('has-stamp-cursor'); move(e); cur.classList.add('on'); play('pad', true); });
+    tile.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') move(e); });
+    tile.addEventListener('pointerleave', off);
+    tile.addEventListener('react-bump', () => {
+      if (over !== tile || reduceMotion()) return;
+      art.animate([
+        { transform: 'translateY(0) rotate(6deg)', offset: 0 },
+        { transform: 'translateY(-9px) rotate(-2deg)', offset: 0.3, easing: 'cubic-bezier(.5,0,1,.6)' },
+        { transform: 'translateY(2px) rotate(0deg) scale(1, .94)', offset: 0.62 },
+        { transform: 'translateY(0) rotate(6deg)', offset: 1 },
+      ], { duration: 240, easing: 'ease-out' });
+    });
+  });
+}
 /* touch and keyboard: no cursor, so the hero stamp presses at once */
 heroStamp?.addEventListener('click', (e) => { if ((e as MouseEvent).shiftKey) return; if (struck) { struck = false; return; } pressStamp(); }); // shift-click is the hanko
 heroStamp?.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); pressStamp(); } });
