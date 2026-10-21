@@ -1,17 +1,17 @@
 ---
 import { site } from '../data/site';
 import Postbox from './Postbox.astro';
+import WeatherIcon from './WeatherIcon.astro';
+import Socials from './Socials.astro';
 const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 ---
 <footer class="wrap foot">
   <div class="foot__top">
-    <div>
-      <p class="label muted">Say hello</p>
-      <a class="mail display" href={`mailto:${site.email}`} data-sound="thunk">{site.email}</a>
-    </div>
-    <ul class="links">
-      {site.links.map((l) => <li><a href={l.href} rel="me noopener" target={l.href.startsWith('http') ? '_blank' : undefined}>{l.label}</a></li>)}
-    </ul>
+    <p class="label muted" style="grid-area: label">Say hello</p>
+    <a class="mail display" style="grid-area: mail" href={`mailto:${site.email}`} data-sound="thunk">{site.email}</a>
+    <div class="icons" style="grid-area: icons"><Socials /></div>
+    <!-- filled by src/scripts/live.ts, stays hidden if the weather request fails -->
+    <p class="here muted" style="grid-area: wx" data-live-row hidden><WeatherIcon /><span>Bengaluru right now: <span data-live-wx></span></span></p>
   </div>
   <div class="foot__bottom rule-top">
     <p class="muted mono small">Last updated {updated}.<span class="more"> Set in a pixel and a sans. Try shift-clicking anywhere.</span></p>
@@ -20,14 +20,20 @@ const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'n
     <Postbox />
   </div>
 </footer>
+<script>import '../scripts/live.ts';</script>
 <style>
   .foot { padding-block: var(--space-9) var(--space-6); display: grid; gap: var(--space-7); }
-  .foot__top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-6); align-items: end; }
-  .mail { font-size: var(--step-3); text-decoration: none; word-break: break-all; border-bottom: 2px solid var(--color-accent); transition: border-color var(--dur-fast); }
-  .mail:hover { border-color: var(--color-text); }
-  .links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
-  .links a { text-underline-offset: 0.25em; text-decoration-color: var(--color-line-strong); }
-  .links a:hover { text-decoration-color: currentColor; }
+  /* the email and the social buttons share one row: email left, buttons right */
+  .foot__top { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "label ." "mail icons" "wx ."; column-gap: var(--space-6); align-items: center; }
+  .icons { justify-self: end; }
+  @media (max-width: 52rem) { .foot__top { grid-template-columns: 1fr; grid-template-areas: "label" "mail" "icons" "wx"; row-gap: var(--space-3); } .icons { justify-self: start; } }
+  .mail { position: relative; display: inline-block; padding-bottom: 0.45em; font-size: var(--step-3); text-decoration: none; word-break: break-all; }
+  /* hand-drawn curly underline, tiled from public/line-curl.svg and coloured by a token */
+  .mail::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0.42em; background: var(--color-accent); transition: background var(--dur-fast);
+    -webkit-mask: url("/line-curl.svg") left center / auto 100% repeat-x; mask: url("/line-curl.svg") left center / auto 100% repeat-x; }
+  .mail:hover::after { background: var(--color-text); }
+  .here { display: flex; align-items: center; gap: var(--space-3); font-size: var(--step--1); margin-top: var(--space-4); }
+  .here[hidden] { display: none; }
   .foot__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4) var(--space-5); padding-top: var(--space-5); }
   .small { font-size: var(--step--1); max-width: 46ch; }
   /* phones: contact, a rule, then one last row with the seal at the left edge and the postbox at the right edge, both standing on the same

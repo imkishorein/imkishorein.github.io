@@ -3,7 +3,7 @@
 
 /* ───────── reset ───────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: clip; } /* html must clip too, or the body's overflow is handed to the viewport and clips nothing */
+html { background-color: var(--color-bg); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: clip; } /* html must clip too, or the body's overflow is handed to the viewport and clips nothing */
 body, h1, h2, h3, p, ul, ol, figure, dl, dd { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 img, svg { display: block; max-width: 100%; }
@@ -118,6 +118,33 @@ main { flex: 1; }
   mask: var(--hand-solid-c) left center / var(--rule-tile) var(--rule-height) no-repeat;
 }
 
+/* ───────── doodle bullets (reusable) ─────────
+   Put class="doodle-list" on any <ul>. Each item gets a small hand-drawn bullet from /bullets/, cycling
+   through six and tilted a little. Pin one style with a modifier: doodle-list--dot, --tick, --arrow,
+   --star, --sprout, --spiral, --squiggle, --flower. Bullets are sized in em so they follow the text size. */
+.doodle-list { list-style: none; display: grid; gap: var(--space-3); padding: 0; }
+.doodle-list > li { position: relative; padding-left: 2em; text-wrap: pretty; }
+.doodle-list > li::before {
+  content: ""; position: absolute; left: 0; top: 0.2em; width: 1.45em; height: 1.45em;
+  background: var(--color-accent-ink); transform: rotate(var(--tilt, 0deg)); transition: transform var(--dur-med) ease;
+  -webkit-mask: var(--bullet) center / contain no-repeat; mask: var(--bullet) center / contain no-repeat;
+}
+.doodle-list > li:nth-child(6n+1) { --bullet: url("/bullets/spiral.svg");   --tilt: -6deg; }
+.doodle-list > li:nth-child(6n+2) { --bullet: url("/bullets/arrow.svg");    --tilt: 3deg; }
+.doodle-list > li:nth-child(6n+3) { --bullet: url("/bullets/star.svg");     --tilt: -5deg; }
+.doodle-list > li:nth-child(6n+4) { --bullet: url("/bullets/sprout.svg");   --tilt: 4deg; }
+.doodle-list > li:nth-child(6n+5) { --bullet: url("/bullets/tick.svg");     --tilt: -3deg; }
+.doodle-list > li:nth-child(6n)   { --bullet: url("/bullets/squiggle.svg"); --tilt: 2deg; }
+.doodle-list--dot > li     { --bullet: url("/bullets/dot.svg") !important; }
+.doodle-list--tick > li    { --bullet: url("/bullets/tick.svg") !important; }
+.doodle-list--arrow > li   { --bullet: url("/bullets/arrow.svg") !important; }
+.doodle-list--star > li    { --bullet: url("/bullets/star.svg") !important; }
+.doodle-list--sprout > li  { --bullet: url("/bullets/sprout.svg") !important; }
+.doodle-list--spiral > li  { --bullet: url("/bullets/spiral.svg") !important; }
+.doodle-list--squiggle > li{ --bullet: url("/bullets/squiggle.svg") !important; }
+.doodle-list--flower > li  { --bullet: url("/bullets/flower.svg") !important; }
+@media (prefers-reduced-motion: no-preference) { .doodle-list > li:hover::before { transform: rotate(calc(var(--tilt, 0deg) + 16deg)) scale(1.2); } }
+
 /* ───────── rows (notes, stuff, timeline) ───────── */
 .row { display: grid; grid-template-columns: 9rem 1fr auto; gap: var(--space-5); align-items: baseline; padding-block: var(--space-5); }
 @media (max-width: 40rem) { .row { grid-template-columns: 1fr; gap: var(--space-2); } }
@@ -162,11 +189,21 @@ main { flex: 1; }
 }
 
 /* ───────── theme change: light spreads out of the lantern (see src/scripts/site.ts) ───────── */
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html[data-vt]::view-transition-old(root), html[data-vt]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 html[data-vt="to-light"]::view-transition-new(root) { z-index: 2; }
 html[data-vt="to-light"]::view-transition-old(root) { z-index: 1; }
 html[data-vt="to-dark"]::view-transition-old(root) { z-index: 2; }
 html[data-vt="to-dark"]::view-transition-new(root) { z-index: 1; }
+
+/* ───────── page change: the old page stays on screen until the next one is ready, then they crossfade ─────────
+   The header is held still. Pages are prepared in the background on hover (speculation rules in Base.astro). */
+@view-transition { navigation: auto; }
+.bar { view-transition-name: site-header; }
+::view-transition-group(site-header) { animation-duration: 0s; }
+::view-transition-old(site-header) { display: none; }
+::view-transition-new(site-header) { animation: none; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 220ms; animation-timing-function: ease-in-out; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 
 /* Old-school stamp cursor over the hero (built in site.ts). The real cursor is hidden while it is on, mouse only. */
 .has-stamp-cursor, .has-stamp-cursor * { cursor: none !important; user-select: none; }

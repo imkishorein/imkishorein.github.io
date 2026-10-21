@@ -60,6 +60,16 @@
     </svg></span>
   </button>
 </div>
+<script is:inline>
+  // Set the saved state before first paint, so a dark page never shows a lit lantern (or a muted speaker) for a moment.
+  (function () {
+    var c = document.currentScript.previousElementSibling;
+    try {
+      c.querySelector('[data-theme-toggle]').setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
+      c.querySelector('[data-sound-toggle]').setAttribute('aria-pressed', String(localStorage.getItem('imk:sound') === 'on'));
+    } catch (e) {}
+  })();
+</script>
 <style>
   /* The icons hang from cords tied to the top edge of the page (Nav makes the header the positioning box). */
   .controls { position: absolute; top: 0; right: 0; display: flex; align-items: flex-start; gap: 0.25rem; z-index: 10; }

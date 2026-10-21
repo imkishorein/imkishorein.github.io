@@ -15,6 +15,7 @@ export const site = {
   // Hero envelope: the viewer is the addressee. One ruled line.
   addressee: 'You, kindly reading',
   focus: 'I design and build enterprise B2B SaaS and AI tools.',
+  now: 'Now designing Setup with Agentforce @ Salesforce',
   yearsLabel: '8+ years',
   // PLACEHOLDER: replace the short bio when ready.
   bio: 'Senior UX Designer working at the intersection of Enterprise SaaS, AI and Platform Engineering. I lead the Friends of Figma Bangalore community and write short notes here about what I build and learn.',
@@ -22,12 +23,13 @@ export const site = {
   email: 'hello@imkishore.in',
   // The postbox in the corner opens a WhatsApp chat. Number is digits only with country code, no + or spaces.
   whatsapp: { number: '918220676721', message: 'Hi Kishore, I found your site and wanted to say hi.' },
+  // `icon` picks the hand-drawn logo in Socials.astro. WhatsApp is built from `whatsapp` above.
   links: [
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/imkishorein/' },
+    { label: 'LinkedIn', icon: 'linkedin', href: 'https://www.linkedin.com/in/imkishorein/' },
     // PLACEHOLDER links: replace or delete.
-    { label: 'GitHub', href: '#', placeholder: true },
-    { label: 'Instagram', href: '#', placeholder: true },
-    { label: 'Figma Community', href: '#', placeholder: true },
+    { label: 'GitHub', icon: 'github', href: '#', placeholder: true },
+    { label: 'Instagram', icon: 'instagram', href: '#', placeholder: true },
+    { label: 'X', icon: 'x', href: '#', placeholder: true },
   ],
 };
 

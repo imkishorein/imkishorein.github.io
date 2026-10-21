@@ -2,8 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import DateStamp from '../components/DateStamp.astro';
-import CompanyMarks from '../components/CompanyMarks.astro';
-import { site, timeline, community, howIWork } from '../data/site';
+import { site, community, howIWork } from '../data/site';
 // "2022 to 2025" becomes a stamp reading 2022, a short line, then 2025. A single year just shows the year.
 const stampOf = (when: string) => { const [from, to] = when.split(' to '); return { main: from, to: to ? (to === 'now' ? 'NOW' : to) : '' }; };
 ---
@@ -17,20 +16,6 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
       <p>Outside work I lead the Friends of Figma Bangalore community, mentoring designers and hosting events that connect the design ecosystem.</p>
     </div>
     <img class="portrait" src="/kishore-portrait.webp" width="756" height="760" alt="Illustrated portrait of Kishore" />
-  </section>
-
-  <section class="wrap block">
-    <h2 class="display h-section">Where I have worked</h2>
-    <ol class="rows">
-      {timeline.map((t) => (
-        <li class="row t">
-          <DateStamp {...stampOf(t.when)} wide />
-          <CompanyMarks name={t.org} />
-          <div><p class="display role">{t.role}</p><p class="muted">{t.org}</p></div>
-          <p class="body">{t.body}</p>
-        </li>
-      ))}
-    </ol>
   </section>
 
   <section class="wrap block">
@@ -48,7 +33,7 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
 
   <section class="wrap block">
     <h2 class="display h-section">How I work</h2>
-    <ul class="prose measure">{howIWork.map((h) => <li>{h}</li>)}</ul>
+    <ul class="prose measure doodle-list">{howIWork.map((h) => <li>{h}</li>)}</ul>
     <p class="muted measure">If you are building AI-powered, platform or enterprise products that need both systems thinking and human-centred design, <a href={`mailto:${site.email}`} data-sound="thunk">say hello</a>.</p>
   </section>
 </Base>
@@ -59,8 +44,6 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
   .block { display: grid; gap: var(--space-5); padding-bottom: var(--space-8); }
   .t { grid-template-columns: 9.5rem 8rem minmax(0, 16rem) 1fr; align-items: start; }
   .t3 { grid-template-columns: 9.5rem minmax(0, 20rem) 1fr; }
-  .t :global(.mark) { align-self: center; }
   .role { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; line-height: var(--leading-snug); }
-  .body { text-wrap: pretty; }
-  @media (max-width: 52rem) { .intro { grid-template-columns: 1fr; } .portrait { position: static; max-width: 22rem; } .t, .t3 { grid-template-columns: 1fr; } .t :global(.mark) { width: 6rem; } }
+  @media (max-width: 52rem) { .intro { grid-template-columns: 1fr; } .portrait { position: static; max-width: 22rem; } .t, .t3 { grid-template-columns: 1fr; } }
 </style>

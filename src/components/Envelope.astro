@@ -7,7 +7,6 @@
 import Stamp from './Stamp.astro';
 import Postmark from './Postmark.astro';
 import PinBoxes from './PinBoxes.astro';
-import WeatherIcon from './WeatherIcon.astro';
 import { site } from '../data/site';
 ---
 <svg class="filters" width="0" height="0" aria-hidden="true" focusable="false">
@@ -36,7 +35,7 @@ import { site } from '../data/site';
         <h1 id="hero-title" class="display h-hero">Kishore<br />Vidyasagar.</h1>
       </div>
       <p class="lead">{site.focus}</p>
-      <div class="here muted" data-live-row hidden><WeatherIcon /><span><span data-live-wx></span> here</span></div>
+      <div class="here now muted"><span class="now-icon" aria-hidden="true"></span><span>{site.now}</span></div>
       <div class="pin-wrap"><PinBoxes chars={site.yearsLabel.toUpperCase().split(' ').flatMap((w, i) => (i ? ['', ...w] : [w]))} label="Experience" summary={`${site.yearsLabel} of experience`} /></div>
     </div>
 
@@ -77,6 +76,7 @@ import { site } from '../data/site';
   .lead { max-width: 28ch; }
   .here { display: flex; align-items: center; gap: var(--space-3); font-size: var(--step--1); }
   .here[hidden] { display: none; }
+  .now-icon { width: 1.9rem; height: 1.33rem; flex: none; margin-inline: 0.125rem; background: var(--brand-salesforce); -webkit-mask: url("/salesforce-cloud.svg") center / contain no-repeat; mask: url("/salesforce-cloud.svg") center / contain no-repeat; }
   .pin-wrap { margin-top: auto; padding-top: var(--space-4); }
   .to { grid-area: to; align-self: end; display: grid; gap: var(--space-2); }
   .address { display: grid; }

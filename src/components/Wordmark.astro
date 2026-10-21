@@ -107,11 +107,17 @@ const star = 'M0 -9 C0 -3 2 -1 8 0 C2 1 0 3 0 9 C0 3 -2 1 -8 0 C-2 -1 0 -3 0 -9 
     var w = document.currentScript.previousElementSibling;
     var last = 0;
     try { last = Number(sessionStorage.getItem('imk:wordmark')) || 0; } catch (e) { /* private mode */ }
-    var n;
-    do { n = 1 + Math.floor(Math.random() * 6); } while (n === last);
+    // Clicking through the site is one visit: keep the style and skip the entrance so the header holds still between pages.
+    // A page seen in the last 20 seconds counts as the same visit (a referrer would be empty on a prepared page). A reload starts afresh.
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    var seen = 0;
+    try { seen = Number(sessionStorage.getItem('imk:wordmark-seen')) || 0; sessionStorage.setItem('imk:wordmark-seen', String(Date.now())); } catch (e) { /* private mode */ }
+    var inSite = last && Date.now() - seen < 20000 && !(nav && nav.type === 'reload');
+    var n = last;
+    if (!inSite) { do { n = 1 + Math.floor(Math.random() * 6); } while (n === last); }
     try { sessionStorage.setItem('imk:wordmark', String(n)); } catch (e) { /* private mode */ }
     w.setAttribute('data-v', String(n));
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (inSite || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     w.setAttribute('data-draw', '');
     // start on the next frame so a busy first paint cannot eat the first letters
     requestAnimationFrame(function () { w.classList.add('in'); });

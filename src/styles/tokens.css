@@ -18,6 +18,7 @@
   /* ───────── 1. PALETTE (raw) ───────── */
   --palette-paper: #e8e9df; /* Soft White  */
   --palette-sage:  #a9b887; /* Sage Green  */
+  --brand-salesforce: #00a1e0; /* Salesforce blue, used only for the cloud mark in the hero */
   --palette-olive: #2e3d28; /* Deep Olive  */
 
   /* ───────── 2. COLOUR ROLES ─────────

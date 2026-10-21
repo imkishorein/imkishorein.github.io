@@ -28,6 +28,12 @@ const canonical = new URL(Astro.url.pathname, site.url).href;
     <meta name="color-scheme" content="light dark" />
     <link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/GeistPixel-Square.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Hold the first paint of a new page until its main content exists, so a page change never shows a half-built frame. -->
+    <link rel="expect" href="#main" blocking="render" />
+    <!-- Get the next page ready as soon as a link is hovered or pressed, so the change is instant instead of a load. -->
+    <script type="speculationrules" is:inline>
+      {"prerender":[{"where":{"href_matches":"/*"},"eagerness":"moderate"}]}
+    </script>
     <!-- Apply the saved theme before first paint to avoid a flash. -->
     <script is:inline>
       try { var t = localStorage.getItem('imk:theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}

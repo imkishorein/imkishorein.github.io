@@ -3,10 +3,14 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Envelope from '../components/Envelope.astro';
 import NoteRow from '../components/NoteRow.astro';
-import { nav } from '../data/site';
+import DateStamp from '../components/DateStamp.astro';
+import CompanyMarks from '../components/CompanyMarks.astro';
+import { nav, timeline } from '../data/site';
 
 const notes = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
+// "2022 to 2025" becomes a stamp reading 2022, a short line, then 2025. A single year just shows the year.
+const stampOf = (when: string) => { const [from, to] = when.split(' to '); return { main: from, to: to ? (to === 'now' ? 'NOW' : to) : '' }; };
 const rooms = nav.filter((n) => n.href !== '/');
 ---
 <Base>
@@ -22,6 +26,20 @@ const rooms = nav.filter((n) => n.href !== '/');
     <ul class="rows">{notes.map((n) => <NoteRow note={n} />)}</ul>
   </section>
 
+  <section class="wrap block" aria-labelledby="work-h">
+    <h2 id="work-h" class="display h-section">Where I have worked</h2>
+    <ol class="rows">
+      {timeline.map((t) => (
+        <li class="row t">
+          <DateStamp {...stampOf(t.when)} wide />
+          <CompanyMarks name={t.org} />
+          <div><p class="display role">{t.role}</p><p class="muted">{t.org}</p></div>
+          <p class="body">{t.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
   <section class="wrap block" aria-labelledby="rooms-h">
     <h2 id="rooms-h" class="display h-section">Around the site</h2>
     <ul class="rows">
@@ -35,7 +53,6 @@ const rooms = nav.filter((n) => n.href !== '/');
     </ul>
   </section>
 </Base>
-<script>import '../scripts/live.ts';</script>
 
 <style>
   .hero { padding-block: var(--space-4) var(--space-9); }
@@ -43,6 +60,10 @@ const rooms = nav.filter((n) => n.href !== '/');
   .block { padding-bottom: var(--space-8); display: grid; gap: var(--space-5); }
   .block__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
   .all { text-underline-offset: 0.3em; }
+  .t { grid-template-columns: 9.5rem 8rem minmax(0, 16rem) 1fr; align-items: start; }
+  .t :global(.mark) { align-self: center; }
+  .role { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; line-height: var(--leading-snug); }
+  .body { text-wrap: pretty; }
   .room { grid-template-columns: 4.5rem minmax(8rem, 14rem) 1fr; align-items: baseline; }
   .soon { white-space: nowrap; margin-left: 0.4em; } /* keeps the dot with the word so it never dangles at a line end */
   .room__link { font-size: var(--step-1); font-weight: 600; text-decoration: none; }
@@ -52,6 +73,7 @@ const rooms = nav.filter((n) => n.href !== '/');
     .postcard { grid-template-columns: 1fr; grid-template-areas: "top" "message" "address"; padding: var(--space-5); gap: var(--space-6); }
     .address { border-left: 0; padding-left: 0; }
     .stamp-zone .st { width: min(46%, 9rem); }
+    .t { grid-template-columns: auto 1fr; align-items: center; } .t :global(.mark) { width: 6rem; justify-self: end; } .t > :nth-child(n+3) { grid-column: 1 / -1; }
     .room { grid-template-columns: 3rem 1fr; } .room > :last-child { grid-column: 2; }
   }
 </style>

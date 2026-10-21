@@ -1,0 +1,55 @@
+---
+// Hand-drawn social logos as small paper-tile link buttons. Same duotone idea as the postbox: a sage shape behind, wobbly ink lines on top.
+// Colours are tokens. The tile tilts on hover (not under reduced motion). Links come from `site.links`, plus WhatsApp from `site.whatsapp`.
+import { site } from '../data/site';
+const { number, message } = site.whatsapp;
+const items = [
+  ...site.links,
+  { label: 'WhatsApp', icon: 'whatsapp', href: `https://wa.me/${number}?text=${encodeURIComponent(message)}` },
+];
+---
+<ul class="socials">
+  {items.map((l, i) => (
+    <li style={`--tilt: ${[-3, 2.5, -2, 3, -2.5][i % 5]}deg`}>
+      <a href={l.href} rel="me noopener" target={l.href.startsWith('http') ? '_blank' : undefined} aria-label={l.label} title={l.label} data-sound="tick">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          {l.icon === 'linkedin' && <>
+            <path class="f" d="M3.6 4.4c5.4-.5 11.6-.4 16.8.1.4 5.2.4 10.3 0 15.2-5.3.5-11 .5-16.8 0-.4-5-.4-10.1 0-15.3z" />
+            <circle class="k" cx="7.7" cy="8.6" r="1" />
+            <path d="M7.7 11.4L7.6 16.9" />
+            <path d="M11.4 16.9L11.5 11.4M11.5 13.1c.9-1.9 4.9-2.3 5 .8l-.1 3" />
+          </>}
+          {l.icon === 'github' && <>
+            <path class="f" d="M12 2.2c5.400-.3 9.800 4.100 9.800 9.700 0 5.500-4.300 10-9.900 9.900-5.500.2-9.800-4.300-9.700-9.800C2.200 6.600 6.500 2 12 2.200z" />
+            <path class="k" style="stroke: currentColor; stroke-width: 0.9" d="M7 6.300L9.700 7.600C11.200 7.100 12.800 7.100 14.300 7.600L17 6.300C17.400 7.500 17.400 8.800 17 9.800C17.700 10.600 18 11.600 18 12.800C18 15.700 15.800 17.300 12 17.300C8.200 17.300 6 15.700 6 12.800C6 11.600 6.300 10.600 7 9.800C6.600 8.800 6.600 7.500 7 6.300z" />
+            <path d="M10.200 17.100C10 18.900 8.600 19.800 6.600 19.200M13.800 17.100C14 18.600 15 19.400 16.600 19.200" style="stroke-width: 1.6" />
+          </>}
+          {l.icon === 'instagram' && <>
+            <path class="f" d="M6.100 3.700c3.900-.2 8-.2 11.800 0 1.600.1 2.300.9 2.400 2.400.2 3.900.2 7.900 0 11.800-.1 1.600-.9 2.300-2.400 2.400-3.900.2-7.900.2-11.800 0-1.600-.1-2.300-.9-2.400-2.400-.2-3.900-.2-7.900 0-11.800.1-1.500.9-2.300 2.400-2.400z" />
+            <path d="M12.100 7.900c2.300-.1 4.200 1.700 4.200 4.100 0 2.400-1.900 4.200-4.200 4.200-2.400 0-4.200-1.800-4.200-4.200 0-2.300 1.800-4 4.200-4.100z" />
+            <circle class="k" cx="17" cy="7.200" r=".95" />
+          </>}
+          {l.icon === 'x' && <>
+            <path d="M20.700 3.300C17.200 6.900 14.400 9.900 12.600 11.800C9.700 14.900 6.300 17.900 3.500 20.600" style="stroke-width: 1.7" />
+            <path class="f" d="M3 3.700C4.700 3.200 6.500 3.600 8.200 3.300C11.700 8.300 15.200 12.600 20.900 20.200C19.200 20.800 17.400 20.100 15.700 20.600C12.200 15.400 7.600 9.800 3 3.700z" />
+          </>}
+          {l.icon === 'whatsapp' && <>
+            <path class="f" d="M12 3.600c-4.800 0-8.400 3.600-8.400 8.400 0 1.600.5 3 1.200 4.200l-1 4.200l4.400-1.100c1.200.7 2.500 1.200 3.800 1.200c4.800 0 8.400-3.600 8.400-8.400S16.800 3.600 12 3.600z" />
+            <path d="M9.100 8.500c-.7.5-.9 1.500-.3 2.800c1 2.100 2.600 3.600 4.700 4.500c1.200.5 2.100.2 2.600-.5l-.1-.8l-1.700-1l-1 .8c-1-.4-2-1.400-2.500-2.500l.8-1l-1-1.700z" />
+          </>}
+        </svg>
+      </a>
+    </li>
+  ))}
+</ul>
+<style>
+  .socials { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .socials a { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-2, 0.6rem);
+    /* light: olive lines on sage. dark: sage lines on a deep tint of sage, so nothing glares */
+    color: light-dark(var(--color-text), var(--color-accent-ink)); transition: transform var(--dur-med) ease; }
+  .socials svg { width: 100%; height: 100%; overflow: visible; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .socials .f { fill: light-dark(var(--color-accent), color-mix(in oklab, var(--color-accent) 22%, var(--color-bg))); }
+  .socials .k { fill: currentColor; stroke: none; }
+  .socials a:focus-visible { outline: 2px solid var(--color-text); outline-offset: 3px; }
+  @media (prefers-reduced-motion: no-preference) { .socials a:hover { transform: translateY(-3px) rotate(var(--tilt)); } }
+</style>
