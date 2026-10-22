@@ -29,9 +29,13 @@ const updated = new Date().toLocaleDateString('en-IN', { month: 'long', year: 'n
   @media (max-width: 52rem) { .foot__top { grid-template-columns: 1fr; grid-template-areas: "label" "mail" "icons" "wx"; row-gap: var(--space-3); } .icons { justify-self: start; } }
   .mail { position: relative; display: inline-block; padding-bottom: 0.45em; font-size: var(--step-3); text-decoration: none; word-break: break-all; }
   /* hand-drawn curly underline, tiled from public/line-curl.svg and coloured by a token */
-  .mail::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0.42em; background: var(--color-accent); transition: background var(--dur-fast);
+  .mail::after, .mail::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0.42em;
     -webkit-mask: url("/line-curl.svg") left center / auto 100% repeat-x; mask: url("/line-curl.svg") left center / auto 100% repeat-x; }
-  .mail:hover::after { background: var(--color-text); }
+  .mail::after { background: var(--color-accent); }
+  /* on hover a second layer in the text colour is revealed left to right, so the pen seems to trace the curls over the old colour; leaving runs it backwards */
+  .mail::before { background: var(--color-text); z-index: 1; clip-path: inset(0 100% 0 0); transition: clip-path 0.7s ease-in-out; }
+  .mail:hover::before, .mail:focus-visible::before { clip-path: inset(0 0 0 0); }
+  @media (prefers-reduced-motion: reduce) { .mail::before { transition: none; } }
   .here { display: flex; align-items: center; gap: var(--space-3); font-size: var(--step--1); margin-top: var(--space-4); }
   .here[hidden] { display: none; }
   .foot__bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4) var(--space-5); padding-top: var(--space-5); }

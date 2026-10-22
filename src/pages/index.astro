@@ -5,13 +5,12 @@ import Envelope from '../components/Envelope.astro';
 import NoteRow from '../components/NoteRow.astro';
 import DateStamp from '../components/DateStamp.astro';
 import CompanyMarks from '../components/CompanyMarks.astro';
-import { nav, timeline } from '../data/site';
+import { site, timeline, howIWork } from '../data/site';
 
 const notes = (await getCollection('notes', (n) => import.meta.env.DEV || !n.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
 // "2022 to 2025" becomes a stamp reading 2022, a short line, then 2025. A single year just shows the year.
 const stampOf = (when: string) => { const [from, to] = when.split(' to '); return { main: from, to: to ? (to === 'now' ? 'NOW' : to) : '' }; };
-const rooms = nav.filter((n) => n.href !== '/');
 ---
 <Base>
   <section class="wrap hero" aria-labelledby="hero-title">
@@ -40,17 +39,10 @@ const rooms = nav.filter((n) => n.href !== '/');
     </ol>
   </section>
 
-  <section class="wrap block" aria-labelledby="rooms-h">
-    <h2 id="rooms-h" class="display h-section">Around the site</h2>
-    <ul class="rows">
-      {rooms.map((r) => (
-        <li class="row room">
-          <span class="jp muted" lang="ja">{r.jp}</span>
-          <a class="room__link display" href={r.href} data-sound="tick">{r.label}</a>
-          <span class="muted">{r.blurb}{!r.live && <span class="label soon">· soon</span>}</span>
-        </li>
-      ))}
-    </ul>
+  <section class="wrap block" aria-labelledby="how-h">
+    <h2 id="how-h" class="display h-section">How I work</h2>
+    <ul class="prose measure doodle-list">{howIWork.map((h) => <li>{h}</li>)}</ul>
+    <p class="muted measure">If you are building AI-powered, platform or enterprise products that need both systems thinking and human-centred design, <a href={`mailto:${site.email}`} data-sound="thunk">say hello</a>.</p>
   </section>
 </Base>
 
@@ -64,16 +56,11 @@ const rooms = nav.filter((n) => n.href !== '/');
   .t :global(.mark) { align-self: center; }
   .role { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.02em; line-height: var(--leading-snug); }
   .body { text-wrap: pretty; }
-  .room { grid-template-columns: 4.5rem minmax(8rem, 14rem) 1fr; align-items: baseline; }
-  .soon { white-space: nowrap; margin-left: 0.4em; } /* keeps the dot with the word so it never dangles at a line end */
-  .room__link { font-size: var(--step-1); font-weight: 600; text-decoration: none; }
-  .room__link:hover { text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: var(--border); }
 
   @media (max-width: 52rem) {
     .postcard { grid-template-columns: 1fr; grid-template-areas: "top" "message" "address"; padding: var(--space-5); gap: var(--space-6); }
     .address { border-left: 0; padding-left: 0; }
     .stamp-zone .st { width: min(46%, 9rem); }
     .t { grid-template-columns: auto 1fr; align-items: center; } .t :global(.mark) { width: 6rem; justify-self: end; } .t > :nth-child(n+3) { grid-column: 1 / -1; }
-    .room { grid-template-columns: 3rem 1fr; } .room > :last-child { grid-column: 2; }
-  }
+    }
 </style>

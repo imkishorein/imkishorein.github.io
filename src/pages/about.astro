@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import DateStamp from '../components/DateStamp.astro';
-import { site, community, howIWork } from '../data/site';
+import { site, community } from '../data/site';
 // "2022 to 2025" becomes a stamp reading 2022, a short line, then 2025. A single year just shows the year.
 const stampOf = (when: string) => { const [from, to] = when.split(' to '); return { main: from, to: to ? (to === 'now' ? 'NOW' : to) : '' }; };
 ---
@@ -31,11 +31,6 @@ const stampOf = (when: string) => { const [from, to] = when.split(' to '); retur
     </ul>
   </section>
 
-  <section class="wrap block">
-    <h2 class="display h-section">How I work</h2>
-    <ul class="prose measure doodle-list">{howIWork.map((h) => <li>{h}</li>)}</ul>
-    <p class="muted measure">If you are building AI-powered, platform or enterprise products that need both systems thinking and human-centred design, <a href={`mailto:${site.email}`} data-sound="thunk">say hello</a>.</p>
-  </section>
 </Base>
 <style>
   .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-7); align-items: center; padding-bottom: var(--space-8); }
