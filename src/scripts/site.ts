@@ -191,14 +191,15 @@ function play(kind: Sound, hover = false) {
 const plane = document.querySelector<SVGElement>('.postbox .plane');
 const still = matchMedia('(prefers-reduced-motion: reduce)');
 /* Things the plane can hit, as tight boxes: every line of text (measured per text node, so the box is the glyphs and not the
-   empty space of the block), pictures and icons, stamps, the lantern and speaker, and the dashed rules (a thin strip on the
-   rule itself). The header, hero and footer all count. Whatever is visible in the window right now. */
-const THINGS = 'img, svg, .stamp, .pm, .lamp, [data-sound-toggle] svg, .rule-top, .rows, .rule-bottom, .row, .hand-b';
+   empty space of the block), pictures and icons, stamps, the lantern and speaker, and (not the dashed rules, it flies across those). The header, hero and footer all count. Whatever is visible in the window right now. */
+const THINGS = 'img, svg, .stamp, .pm, .lamp, [data-sound-toggle] svg';
+const RULES = '.rule-top, .rows, .rule-bottom, .rule-solid, .row, .hand-b, .hand-l, .cord';   // dividers and cords are not solid: the plane flies across them. Text, badges, icons and other UI boxes are
 function collectRects() {
   const H = innerHeight, W = innerWidth, avoid = plane?.closest('.postbox')?.getBoundingClientRect();
   const els: HTMLElement[] = [], rects: Rect[] = [];
   const add = (q: { left: number; top: number; right: number; bottom: number }, el: HTMLElement, minW = 10, minH = 8) => {
-    if (q.right - q.left < minW || q.bottom - q.top < minH || q.top < 4 || q.bottom > H - 4 || q.left < 0 || q.right > W) return;
+    q = { left: Math.max(q.left, 0), right: Math.min(q.right, W), top: Math.max(q.top, 0), bottom: Math.min(q.bottom, H) };  // partly off screen still counts
+    if (q.right - q.left < minW || q.bottom - q.top < minH) return;
     if (avoid && q.right > avoid.left - 10 && q.left < avoid.right && q.bottom > avoid.top - 10) return;
     rects.push({ x0: q.left, y0: q.top, x1: q.right, y1: q.bottom, id: els.length }); els.push(el);
   };
@@ -207,14 +208,19 @@ function collectRects() {
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     const el = n.parentElement; if (!el || !n.textContent?.trim() || el.closest('.postbox, script, style, .sr-only, [aria-hidden="true"]') || !shown(el)) continue;
     const r = document.createRange(); r.selectNodeContents(n);
-    [...r.getClientRects()].forEach((q) => add(q, el, 14, 8));
+    [...r.getClientRects()].forEach((q) => add(q, el, 4, 4));
   }
   document.querySelectorAll<HTMLElement>(THINGS).forEach((el) => {
     if (el.closest('.postbox') || !shown(el)) return;
     const q = el.getBoundingClientRect();
-    if (el.matches('.rule-top, .rows')) add({ left: q.left, right: q.right, top: q.top - 5, bottom: q.top + 5 }, el, 20, 8);
-    else if (el.matches('.rule-bottom, .row, .hand-b')) add({ left: q.left, right: q.right, top: q.bottom - 5, bottom: q.bottom + 5 }, el, 20, 8);
-    else add(q, el, 14, 14);
+    add(q, el, 6, 6);
+  });
+  // boxes with their own fill or border (buttons, tags, tiles, cards) are solid too, unless they are page-sized wrappers
+  document.querySelectorAll<HTMLElement>('main *, header *, footer *').forEach((el) => {
+    if (el.closest('.postbox') || el.matches(THINGS) || el.matches(RULES)) return;
+    const q = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    const boxed = !/, 0\)$/.test(cs.backgroundColor) || cs.borderTopWidth !== '0px' || cs.borderLeftWidth !== '0px';
+    if (boxed && q.width * q.height < W * H * 0.35 && shown(el)) add(q, el, 6, 6);
   });
   return { rects, els };
 }
@@ -235,7 +241,15 @@ function launchPlane() {
   kf[kf.length - 1].offset = 1;
   plane.classList.remove('hurt');
   const box = plane.closest('.postbox'); box?.classList.add('sending'); setTimeout(() => box?.classList.remove('sending'), lead + 900);
-  plane.animate(kf, { duration: total, delay: lead, fill: 'backwards', easing: 'linear' });
+  const flying = plane.animate(kf, { duration: total, delay: lead, fill: 'backwards', easing: 'linear' });
+  // The flight is planned against the page as it is right now. The desktop postbox is fixed to the window, so if the page is
+  // scrolled mid-flight the content would slide under the plane and it would fly over things. Carry the plane with the page
+  // instead (the individual `translate` property stacks with the animated transform). On phones the postbox scrolls already.
+  if (box && getComputedStyle(box).position === 'fixed') {
+    const sx = scrollX, sy = scrollY, follow = () => { plane.style.translate = `${sx - scrollX}px ${sy - scrollY}px`; };
+    const done = () => { removeEventListener('scroll', follow); plane.style.translate = ''; };
+    addEventListener('scroll', follow, { passive: true }); flying.finished.then(done, done);
+  }
   setTimeout(() => { play('whoosh', true); haptic(HAPTICS.launch); }, lead);
   const hit = els[flight.hitId];
   setTimeout(() => { // the hit: a tap sound and a tiny shake of whatever it landed on (individual properties, so existing transforms survive)

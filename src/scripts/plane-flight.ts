@@ -11,6 +11,7 @@ export type Flight = { samples: Sample[]; duration: number; hitAt: number; hitId
 type Opts = { ox: number; oy: number; W: number; H: number; rects: Rect[] };
 type Style = 'low' | 'high' | 'loop' | 'sweep' | 'circle';
 
+const BODY = 10;                                                         // collision radius of the plane body, px
 const G = 640, VE = 280, LD = 5.5, DT = 1 / 120, REC = 4;      // px/s², trim speed (lift = weight), glide ratio, step, steps per sample
 const rad = (d: number) => d * Math.PI / 180, clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 const wrap = (a: number) => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
@@ -22,7 +23,7 @@ function attempt(o: Opts, style: Style, tgt: Rect): Flight | null {
   const side = Math.random() < 0.5 ? -1 : 1, ph = [rnd(0, 6.3), rnd(0, 6.3), rnd(0, 6.3), rnd(0, 6.3)];
   // ---- launch: each style throws differently
   let V: number, gam: number, lift: number;
-  const psi0 = Math.PI + rnd(-0.7, 0.7) + (Math.random() < 0.3 ? rnd(-1.2, 1.2) : 0);
+  const psi0 = Math.PI + rnd(-1, 1) + (Math.random() < 0.3 ? rnd(-1.2, 1.2) : 0);
   if (style === 'low') { V = rnd(480, 760); gam = rad(rnd(4, 24)); lift = rnd(25, 75); }
   else if (style === 'high') { V = rnd(900, 1200); gam = rad(rnd(52, 74)); lift = rnd(150, 230); }
   else if (style === 'loop') { V = rnd(650, 900); gam = rad(rnd(30, 55)); lift = rnd(90, 150); }
@@ -84,17 +85,28 @@ function attempt(o: Opts, style: Style, tgt: Rect): Flight | null {
         if (!rotInit) { rot = a; rotInit = true; } else { let d = a - rot; while (d > 180) d -= 360; while (d < -180) d += 360; rot += d * Math.min(1, DT * 10); }
       }
 
-      // ---- did it fly into something?
+      // ---- did it fly into something? The plane has a body (BODY px), the path from the last step is swept so a fast plane
+      // cannot slip through a thin line, and depth is ignored: if it overlaps anything on screen, it hits. Only the open gaps are safe.
       const nx = ox + X, ny = oy - h;
-      if (t > 0.9 && Math.abs(Z) < 90) {
-        for (const q2 of rects) {
-          if (nx > q2.x0 - 2 && nx < q2.x1 + 2 && ny > q2.y0 - 2 && ny < q2.y1 + 2) {
-            const dl = nx - q2.x0, dr = q2.x1 - nx, dtp = ny - q2.y0, db = q2.y1 - ny, m = Math.min(dl, dr, dtp, db);
-            if (m === dl || m === dr) { fvx = -0.3 * vx; fvh = vh * 0.4 + 60; }                 // hit a side: bounce back off it
-            else { fvx = vx * 0.4; fvh = m === dtp ? Math.abs(vh) * 0.25 + 40 : -Math.abs(vh) * 0.2; } // hit a top (hop up) or a bottom (drop)
-            fvx = clamp(fvx, -260, 260);
-            fall = true; hitAt = t; hitId = q2.id; rot0 = rot; spin = rnd(160, 300) * (fvx > 0 ? 1 : -1); tf = 0;
-            break;
+      if (t > 0.3) {
+        const lx = Math.min(px, nx) - BODY, hx = Math.max(px, nx) + BODY, ly = Math.min(py, ny) - BODY, hy = Math.max(py, ny) + BODY;
+        let near: Rect[] | null = null;
+        for (const q2 of rects) if (q2.x1 > lx && q2.x0 < hx && q2.y1 > ly && q2.y0 < hy) (near ??= []).push(q2);
+        if (near) {
+          const n = Math.max(1, Math.ceil(Math.hypot(nx - px, ny - py) / 3));
+          scan: for (let k = 1; k <= n; k++) {
+            const cx = px + (nx - px) * k / n, cy = py + (ny - py) * k / n;
+            for (const q2 of near) {
+              if (cx > q2.x0 - BODY && cx < q2.x1 + BODY && cy > q2.y0 - BODY && cy < q2.y1 + BODY) {
+                const dl = cx - (q2.x0 - BODY), dr = q2.x1 + BODY - cx, dtp = cy - (q2.y0 - BODY), db = q2.y1 + BODY - cy, m = Math.min(dl, dr, dtp, db);
+                if (m === dl || m === dr) { fvx = -0.3 * vx; fvh = vh * 0.4 + 60; }                 // hit a side: bounce back off it
+                else { fvx = vx * 0.4; fvh = m === dtp ? Math.abs(vh) * 0.25 + 40 : -Math.abs(vh) * 0.2; } // hit a top (hop up) or a bottom (drop)
+                fvx = clamp(fvx, -260, 260);
+                X = cx - ox; h = oy - cy;                                                              // stop at the surface, not inside it
+                fall = true; hitAt = t; hitId = q2.id; rot0 = rot; spin = rnd(160, 300) * (fvx > 0 ? 1 : -1); tf = 0;
+                break scan;
+              }
+            }
           }
         }
       }
@@ -118,26 +130,39 @@ function attempt(o: Opts, style: Style, tgt: Rect): Flight | null {
   }
 }
 
+let lastZone = '';
 let last: { x: number; y: number } | null = null;                       // where the last flight ended, so it never hits the same spot twice running
 const nearLast = (q: Rect) => !!last && Math.hypot((q.x0 + q.x1) / 2 - last.x, (q.y0 + q.y1) / 2 - last.y) < 140;
 /** Pick a style and a target that suits it (low flights aim low, high ones aim at the header and hero, the rest anywhere), then try
  *  random plans until one ends at that target or close to it. Never the same thing twice in a row. */
 export function planFlight(o: Opts): Flight | null {
-  const { H, rects } = o, styles: Style[] = ['low', 'high', 'loop', 'sweep', 'sweep', 'circle'];
-  const first = pick(styles), order = [first, ...styles.filter((s) => s !== first)];
-  const band = (s: Style) => (q: Rect) => { const c = (q.y0 + q.y1) / 2; return !nearLast(q) && (s === 'low' ? c > H * 0.6 : s === 'high' ? c < H * 0.36 : true); };
-  let any: Flight | null = null; const mid = (q: Rect) => ({ x: (q.x0 + q.x1) / 2, y: (q.y0 + q.y1) / 2 });
-  for (const style of order) {
-    const cand = rects.filter(band(style)); if (!cand.length) continue;
-    const tgt = pick(cand), cx = (tgt.x0 + tgt.x1) / 2, cy = (tgt.y0 + tgt.y1) / 2;
-    for (let n = 0; n < 70; n++) {
+  const { W, H, rects } = o, styles: Style[] = ['low', 'high', 'loop', 'sweep', 'sweep', 'circle'];
+  const mid = (q: Rect) => ({ x: (q.x0 + q.x1) / 2, y: (q.y0 + q.y1) / 2 });
+  // Each launch picks a landing zone at random, never the same one twice running, so flights end all over the page. The far left
+  // (the start of the content) is the likeliest, then the middle, the right and the top strip. A target and the zone are chosen
+  // first and a flight is only accepted when it ends in the zone; if the time budget runs out, the closest one wins.
+  const zones: Record<string, (q: Rect) => boolean> = {
+    left: (q) => mid(q).x < W * 0.38, mid: (q) => mid(q).x >= W * 0.38 && mid(q).x < W * 0.7,
+    right: (q) => mid(q).x >= W * 0.7, top: (q) => mid(q).y < H * 0.3 };
+  const names = Object.keys(zones).filter((k) => k !== lastZone), weights: Record<string, number> = { left: 4, mid: 3, right: 2, top: 2 };
+  let roll = Math.random() * names.reduce((a, k) => a + weights[k], 0), zn = names[0];
+  for (const k of names) { if ((roll -= weights[k]) < 0) { zn = k; break; } }
+  const zone = zones[zn]; lastZone = zn;
+  const dist = (q: Rect) => zn === 'left' ? mid(q).x : zn === 'right' ? W - mid(q).x : zn === 'top' ? mid(q).y : Math.abs(mid(q).x - W * 0.54);
+  const band = (s: Style) => (q: Rect) => { const c = mid(q).y; return !nearLast(q) && zone(q) && (s === 'low' ? c > H * 0.6 : s === 'high' ? c < H * 0.36 : true); };
+  const t0 = performance.now(); let best: Flight | null = null, bestX = Infinity;
+  for (let round = 0; performance.now() - t0 < 260; round++) {
+    const style = pick(styles), cand = rects.filter(band(style));
+    if (!cand.length) { if (round > 40) break; continue; }
+    const tgt = pick(cand);
+    for (let n = 0; n < 8; n++) {
       const f = attempt(o, style, tgt);
-      if (!f || f.hitAt < 1.6 || f.duration > 13 || nearLast(rects[f.hitId])) continue;
-      const r = rects[f.hitId], near = Math.hypot((r.x0 + r.x1) / 2 - cx, (r.y0 + r.y1) / 2 - cy) < 220;
-      if (near) { last = mid(r); return f; }
-      any ??= f;
+      if (!f || f.hitAt < 1.8 || f.duration > 13 || nearLast(rects[f.hitId])) continue;
+      const r = rects[f.hitId];
+      if (zone(r)) { last = mid(r); return f; }
+      const d = dist(r); if (d < bestX) { best = f; bestX = d; }
     }
   }
-  if (any) last = mid(rects[any.hitId]);
-  return any;
+  if (best) last = mid(rects[best.hitId]);
+  return best;
 }
